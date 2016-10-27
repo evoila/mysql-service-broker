@@ -8,7 +8,10 @@ import java.security.SecureRandom;
 import java.sql.SQLException;
 
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
+import de.evoila.cf.broker.model.ServerAddress;
+import de.evoila.cf.broker.model.ServiceInstance;
 import de.evoila.cf.broker.service.mysql.jdbc.MySQLDbService;
 
 /**
@@ -43,15 +46,60 @@ public class MySQLCustomImplementation {
 		SecureRandom random = new SecureRandom();
 		String passwd = new BigInteger(130, random).toString(32);
 
-		jdbcService.executeUpdate("CREATE USER \"" + bindingId + "\" IDENTIFIED BY \"" + passwd + "\"");
-		jdbcService.executeUpdate("GRANT ALL PRIVILEGES ON `" + serviceInstanceId + "`.* TO `" + bindingId + "`@\"%\"");
-		jdbcService.executeUpdate("FLUSH PRIVILEGES");
+		bindRoleToDatabaseWithPassword(jdbcService, serviceInstanceId, bindingId, passwd);
 
 		return passwd;
 	}
 
+	public void bindRoleToDatabaseWithPassword(MySQLDbService jdbcService, String serviceInstanceId, String bindingId,
+			String password) throws SQLException {
+		jdbcService.executeUpdate("CREATE USER \"" + bindingId + "\" IDENTIFIED BY \"" + password + "\"");
+		jdbcService.executeUpdate("GRANT ALL PRIVILEGES ON `" + serviceInstanceId + "`.* TO `" + bindingId + "`@\"%\"");
+		jdbcService.executeUpdate("FLUSH PRIVILEGES");
+	}
+
 	public void unbindRoleFromDatabase(MySQLDbService jdbcService, String bindingId) throws SQLException {
 		jdbcService.executeUpdate("DROP USER \"" + bindingId + "\"");
+	}
+
+	public MySQLDbService connection(ServiceInstance serviceInstance) throws SQLException {
+		MySQLDbService jdbcService = new MySQLDbService();
+		if (jdbcService.isConnected())
+			return jdbcService;
+		else {
+			Assert.notNull(serviceInstance, "ServiceInstance may not be null");
+			String instanceId = serviceInstance.getId();
+			Assert.notNull(instanceId, "Id of ServiceInstance may not be null");
+			ServerAddress host = serviceInstance.getHosts().get(0);
+			Assert.notNull(host.getIp(), "Host of ServiceInstance may not be null");
+			Assert.notNull(host.getPort(), "Port of ServiceInstance may not be null");
+	
+			final boolean isConnected = jdbcService.createConnection(host.getIp(),
+					host.getPort(), instanceId, instanceId, instanceId);
+			if (isConnected)
+				return jdbcService;
+			else
+				return null;
+		}
+	}
+	
+	public MySQLDbService connection(String host, int port, String database, String username, String password) throws SQLException {
+		MySQLDbService jdbcService = new MySQLDbService();
+		if (jdbcService.isConnected())
+			return jdbcService;
+		else {
+			Assert.notNull(host, "Host may not be null");
+			Assert.notNull(database, "Database may not be null");
+			Assert.notNull(username, "Username may not be null");
+			Assert.notNull(password, "Password may not be null");
+	
+			final boolean isConnected = jdbcService.createConnection(host,
+					port, database, username, password);
+			if (isConnected)
+				return jdbcService;
+			else
+				return null;
+		}
 	}
 
 }

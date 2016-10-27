@@ -33,13 +33,14 @@ public class MySQLDbService {
 
 	private int port;
 
-	public boolean createConnection(String instanceId, String host, int port) {
+	public boolean createConnection(String host, int port, String database, String username, String password) {
 		this.host = host;
 		this.port = port;
+		String user = (username == null) ? ROOT_USER : username;
 		try {
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
-			String url = "jdbc:mysql://" + host + ":" + port + "/" + instanceId;
-			connection = DriverManager.getConnection(url, ROOT_USER, instanceId);
+			String url = "jdbc:mysql://" + host + ":" + port + "/" + database;
+			connection = DriverManager.getConnection(url, user, password);
 		} catch (ClassNotFoundException | SQLException | InstantiationException | IllegalAccessException e) {
 			log.info("Could not establish connection", e);
 			return false;

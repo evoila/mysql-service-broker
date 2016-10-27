@@ -102,3 +102,12 @@ openstack:
   log_port:
   cinder:
     az:
+
+#### Existing MySQL Server/Cluster ####
+existing:
+  endpoint:
+    host:
+    port:
+    database:
+    username:
+    password: 

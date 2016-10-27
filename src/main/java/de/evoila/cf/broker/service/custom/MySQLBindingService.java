@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import de.evoila.cf.broker.exception.ServiceBrokerException;
 import de.evoila.cf.broker.model.Plan;
@@ -35,70 +34,6 @@ public class MySQLBindingService extends BindingServiceImpl {
 	@Autowired
 	private MySQLCustomImplementation mysqlCustomImplementation;
 
-	private MySQLDbService connection(ServiceInstance serviceInstance) throws SQLException {
-		MySQLDbService jdbcService = new MySQLDbService();
-		if (jdbcService.isConnected())
-			return jdbcService;
-		else {
-			Assert.notNull(serviceInstance, "ServiceInstance may not be null");
-			Assert.notNull(serviceInstance.getId(), "Id of ServiceInstance may not be null");
-			ServerAddress host = serviceInstance.getHosts().get(0);
-			Assert.notNull(host.getIp(), "Host of ServiceInstance may not be null");
-			Assert.notNull(host.getPort(), "Port of ServiceInstance may not be null");
-
-			final boolean isConnected = jdbcService.createConnection(serviceInstance.getId(), host.getIp(),
-					host.getPort());
-			if (isConnected)
-				return jdbcService;
-			else
-				return null;
-		}
-	}
-
-	public void create(ServiceInstance serviceInstance, Plan plan) throws ServiceBrokerException {
-		MySQLDbService jdbcService = null;
-		try {
-			jdbcService = connection(serviceInstance);
-		} catch (SQLException e1) {
-			throw new ServiceBrokerException("Could not connect to database");
-		}
-
-		if (jdbcService == null)
-			throw new ServiceBrokerException("Could not connect to database");
-
-		String instanceId = serviceInstance.getId();
-
-		try {
-			jdbcService.executeUpdate("CREATE DATABASE \"" + instanceId + "\" ENCODING 'UTF8'");
-			jdbcService.executeUpdate("REVOKE all on database \"" + instanceId + "\" from public");
-		} catch (SQLException e) {
-			log.error(e.toString());
-			throw new ServiceBrokerException("Could not add to database");
-		}
-	}
-
-	public void delete(ServiceInstance serviceInstance, Plan plan) throws ServiceBrokerException {
-		MySQLDbService jdbcService = null;
-		try {
-			jdbcService = connection(serviceInstance);
-		} catch (SQLException e1) {
-			throw new ServiceBrokerException("Could not connect to database");
-		}
-
-		if (jdbcService == null)
-			throw new ServiceBrokerException("Could not connect to database");
-
-		String instanceId = serviceInstance.getId();
-
-		try {
-			jdbcService.executeUpdate("REVOKE all on database \"" + instanceId + "\" from public");
-			jdbcService.executeUpdate("DROP DATABASE \"" + instanceId + "\"");
-		} catch (SQLException e) {
-			log.error(e.toString());
-			throw new ServiceBrokerException("Could not remove from database");
-		}
-	}
-
 	private String username(String bindingId) {
 		return bindingId.replace("-", "").substring(0, 10);
 	}
@@ -117,7 +52,7 @@ public class MySQLBindingService extends BindingServiceImpl {
 
 		MySQLDbService jdbcService = null;
 		try {
-			jdbcService = connection(serviceInstance);
+			jdbcService = mysqlCustomImplementation.connection(serviceInstance);
 		} catch (SQLException e1) {
 			throw new ServiceBrokerException("Could not connect to database");
 		}
@@ -147,7 +82,7 @@ public class MySQLBindingService extends BindingServiceImpl {
 	protected void deleteBinding(String bindingId, ServiceInstance serviceInstance) throws ServiceBrokerException {
 		MySQLDbService jdbcService = null;
 		try {
-			jdbcService = connection(serviceInstance);
+			jdbcService = mysqlCustomImplementation.connection(serviceInstance);
 		} catch (SQLException e1) {
 			throw new ServiceBrokerException("Could not connect to database");
 		}
