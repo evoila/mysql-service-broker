@@ -1,5 +1,5 @@
 heat_template_version: 2013-05-23
-description: Deployment Description for PostgreSQL
+description: Deployment Description for MySQL
 parameters:
   image_id:
     type: string
