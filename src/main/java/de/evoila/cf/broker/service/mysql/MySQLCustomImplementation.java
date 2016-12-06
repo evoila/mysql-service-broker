@@ -7,11 +7,17 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.sql.SQLException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import de.evoila.cf.broker.exception.ServiceBrokerException;
+import de.evoila.cf.broker.model.Plan;
+import de.evoila.cf.broker.model.Platform;
 import de.evoila.cf.broker.model.ServerAddress;
 import de.evoila.cf.broker.model.ServiceInstance;
+import de.evoila.cf.broker.repository.ServiceDefinitionRepository;
+import de.evoila.cf.broker.service.custom.MySQLExistingServiceFactory;
 import de.evoila.cf.broker.service.mysql.jdbc.MySQLDbService;
 
 /**
@@ -40,6 +46,12 @@ public class MySQLCustomImplementation {
 	// jdbcService.checkValidUUID(instanceId);
 	// jdbcService.executeUpdate("DROP ROLE IF EXISTS \"" + instanceId + "\"");
 	// }
+	
+	@Autowired
+	private ServiceDefinitionRepository serviceDefinitionRepository;
+	
+	@Autowired(required=false)
+	private MySQLExistingServiceFactory existingServiceFactory;
 
 	public String bindRoleToDatabase(MySQLDbService jdbcService, String serviceInstanceId, String bindingId)
 			throws SQLException {
@@ -62,7 +74,7 @@ public class MySQLCustomImplementation {
 		jdbcService.executeUpdate("DROP USER \"" + bindingId + "\"");
 	}
 
-	public MySQLDbService connection(ServiceInstance serviceInstance) throws SQLException {
+	public MySQLDbService connection(ServiceInstance serviceInstance) throws SQLException, ServiceBrokerException {
 		MySQLDbService jdbcService = new MySQLDbService();
 		if (jdbcService.isConnected())
 			return jdbcService;
@@ -73,9 +85,16 @@ public class MySQLCustomImplementation {
 			ServerAddress host = serviceInstance.getHosts().get(0);
 			Assert.notNull(host.getIp(), "Host of ServiceInstance may not be null");
 			Assert.notNull(host.getPort(), "Port of ServiceInstance may not be null");
+			
+			String password = instanceId;
+			String planId = serviceInstance.getPlanId();
+			Plan plan = serviceDefinitionRepository.getPlan(planId);
+			if(plan.getPlatform() == Platform.EXISTING_SERVICE) {
+				password = existingServiceFactory.getPassword();
+			}
 	
 			final boolean isConnected = jdbcService.createConnection(host.getIp(),
-					host.getPort(), instanceId, instanceId, instanceId);
+					host.getPort(), instanceId, null, password);
 			if (isConnected)
 				return jdbcService;
 			else

@@ -32,10 +32,10 @@ public class Application {
 		return customProperties;
 	}
 
-	@Value("${openstack.log_port}")
+	@Value("${openstack.log_port:0}")
 	private String logPort;
 
-	@Value("${openstack.log_host}")
+	@Value("${openstack.log_host:localhost}")
 	private String logHost;
 
 	@Bean

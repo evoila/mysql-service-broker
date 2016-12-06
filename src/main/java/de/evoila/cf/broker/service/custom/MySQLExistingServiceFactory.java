@@ -29,19 +29,19 @@ import jersey.repackaged.com.google.common.collect.Lists;
 @ConditionalOnProperty(prefix="existing.endpoint", name={"host","port","username","password","database"},havingValue="")
 public class MySQLExistingServiceFactory extends ExistingServiceFactory {
 	
-	@Value("${existing.endpoint.host")
+	@Value("${existing.endpoint.host}")
 	private String host;
 	
-	@Value("${existing.endpoint.port")
+	@Value("${existing.endpoint.port}")
 	private int port;
 	
-	@Value("${existing.endpoint.username")
+	@Value("${existing.endpoint.username}")
 	private String username;
 	
-	@Value("${existing.endpoint.password")
+	@Value("${existing.endpoint.password}")
 	private String password;
 	
-	@Value("${existing.endpoint.database")
+	@Value("${existing.endpoint.database}")
 	private String database;
 	
 	@Autowired
@@ -52,9 +52,7 @@ public class MySQLExistingServiceFactory extends ExistingServiceFactory {
 	 */
 	@Override
 	protected List<ServerAddress> getExistingServiceHosts() {
-		ServerAddress serverAddress = new ServerAddress();
-		serverAddress.setIp(host);
-		serverAddress.setName("existing_cluster");
+		ServerAddress serverAddress = new ServerAddress("existing_cluster", host, port);
 		return Lists.newArrayList(serverAddress);
 	}
 
@@ -88,8 +86,8 @@ public class MySQLExistingServiceFactory extends ExistingServiceFactory {
 
 	public void createDatabase(MySQLDbService connection, String database) throws PlatformException {
 		try {
-			connection.executeUpdate("CREATE DATABASE \"" + database + "\" ENCODING 'UTF8'");
-			connection.executeUpdate("REVOKE all on database \"" + database + "\" from public");
+			connection.executeUpdate("CREATE DATABASE `" + database + "`");
+			//connection.executeUpdate("REVOKE all on database " + database + " from public");
 		} catch (SQLException e) {
 			log.error(e.toString());
 			throw new PlatformException("Could not add to database");
@@ -98,11 +96,15 @@ public class MySQLExistingServiceFactory extends ExistingServiceFactory {
 
 	public void deleteDatabase(MySQLDbService connection, String database) throws PlatformException {
 		try {
-			connection.executeUpdate("REVOKE all on database \"" + database + "\" from public");
-			connection.executeUpdate("DROP DATABASE \"" + database + "\"");
+			//connection.executeUpdate("REVOKE all on database \"" + database + "\" from public");
+			connection.executeUpdate("DROP DATABASE `" + database + "`");
 		} catch (SQLException e) {
 			log.error(e.toString());
 			throw new PlatformException("Could not remove from database");
 		}
+	}
+
+	public String getPassword() {
+		return this.password;
 	}
 }
