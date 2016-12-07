@@ -19,13 +19,15 @@ import de.evoila.cf.broker.model.ServiceInstance;
 import de.evoila.cf.broker.repository.ServiceDefinitionRepository;
 import de.evoila.cf.broker.service.custom.MySQLExistingServiceFactory;
 import de.evoila.cf.broker.service.mysql.jdbc.MySQLDbService;
+import de.evoila.cf.cpi.existing.CustomExistingService;
+import de.evoila.cf.cpi.existing.CustomExistingServiceConnection;
 
 /**
  * @author Johannes Hiemer.
  *
  */
 @Service
-public class MySQLCustomImplementation {
+public class MySQLCustomImplementation implements CustomExistingService {
 
 	// public void initServiceInstance(ServiceInstance serviceInstance, String[]
 	// databases) throws SQLException {
@@ -102,7 +104,7 @@ public class MySQLCustomImplementation {
 		}
 	}
 	
-	public MySQLDbService connection(String host, int port, String database, String username, String password) throws SQLException {
+	public CustomExistingServiceConnection connection(String host, int port, String database, String username, String password) throws SQLException {
 		MySQLDbService jdbcService = new MySQLDbService();
 		if (jdbcService.isConnected())
 			return jdbcService;
@@ -119,6 +121,13 @@ public class MySQLCustomImplementation {
 			else
 				return null;
 		}
+	}
+
+	@Override
+	public void bindRoleToInstanceWithPassword(CustomExistingServiceConnection connection, String database,
+			String username, String password) throws Exception {
+		if(connection instanceof MySQLDbService)
+			this.bindRoleToDatabaseWithPassword((MySQLDbService) connection, database, username, password);		
 	}
 
 }

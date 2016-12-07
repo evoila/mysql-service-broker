@@ -17,11 +17,13 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.evoila.cf.cpi.existing.CustomExistingServiceConnection;
+
 /**
  * @author Johannes Hiemer
  *
  */
-public class MySQLDbService {
+public class MySQLDbService implements CustomExistingServiceConnection {
 
 	private Logger log = LoggerFactory.getLogger(getClass());
 
