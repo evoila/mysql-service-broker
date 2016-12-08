@@ -41,9 +41,14 @@
 			<artifactId>existing-service</artifactId>
 			<version>0.1-RC</version>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>de.evoila.cf.broker</groupId>
 			<artifactId>persistence-redis</artifactId>
+			<version>0.1-RC</version>
+		</dependency> -->
+		<dependency>
+			<groupId>de.evoila.cf.broker</groupId>
+			<artifactId>persistence-mongodb</artifactId>
 			<version>0.1-RC</version>
 		</dependency>
 	</dependencies>
