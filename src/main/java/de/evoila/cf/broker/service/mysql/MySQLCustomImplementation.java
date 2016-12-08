@@ -65,10 +65,10 @@ public class MySQLCustomImplementation implements CustomExistingService {
 		return passwd;
 	}
 
-	public void bindRoleToDatabaseWithPassword(MySQLDbService jdbcService, String serviceInstanceId, String bindingId,
+	public void bindRoleToDatabaseWithPassword(MySQLDbService jdbcService, String database, String username,
 			String password) throws SQLException {
-		jdbcService.executeUpdate("CREATE USER \"" + bindingId + "\" IDENTIFIED BY \"" + password + "\"");
-		jdbcService.executeUpdate("GRANT ALL PRIVILEGES ON `" + serviceInstanceId + "`.* TO `" + bindingId + "`@\"%\"");
+		jdbcService.executeUpdate("CREATE USER \"" + username + "\" IDENTIFIED BY \"" + password + "\"");
+		jdbcService.executeUpdate("GRANT ALL PRIVILEGES ON `" + database + "`.* TO `" + username + "`@\"%\"");
 		jdbcService.executeUpdate("FLUSH PRIVILEGES");
 	}
 
