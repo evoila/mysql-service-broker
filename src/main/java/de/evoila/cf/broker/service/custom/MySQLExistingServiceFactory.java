@@ -56,12 +56,12 @@ public class MySQLExistingServiceFactory extends ExistingServiceFactory {
 	@Override
 	protected void deleteInstance(CustomExistingServiceConnection connection, String instanceId) throws PlatformException {
 		if(connection instanceof MySQLDbService)
-			createDatabase((MySQLDbService) connection, instanceId);
+			deleteDatabase((MySQLDbService) connection, instanceId);
 	}
 
 	@Override
 	protected void createInstance(CustomExistingServiceConnection connection, String instanceId) throws PlatformException {
 		if(connection instanceof MySQLDbService)
-			deleteDatabase((MySQLDbService) connection, instanceId);
+			createDatabase((MySQLDbService) connection, instanceId);
 	}
 }
