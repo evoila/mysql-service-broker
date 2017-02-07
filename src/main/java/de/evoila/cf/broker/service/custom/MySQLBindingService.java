@@ -62,6 +62,10 @@ public class MySQLBindingService extends BindingServiceImpl {
 
 		String username = username(bindingId);
 		String password = "";
+		String hostIp = host.getIp();
+		int hostPort = host.getPort();
+		String database = serviceInstance.getId();
+		
 		try {
 			password = mysqlCustomImplementation.bindRoleToDatabase(jdbcService, serviceInstance.getId(), username);
 		} catch (SQLException e) {
@@ -69,11 +73,16 @@ public class MySQLBindingService extends BindingServiceImpl {
 			throw new ServiceBrokerException("Could not update database");
 		}
 
-		String dbURL = String.format("mysql://%s:%s@%s:%d/%s", username, password, host.getIp(), host.getPort(),
-				serviceInstance.getId());
+		String dbURL = String.format("mysql://%s:%s@%s:%d/%s", username, password, hostIp, hostPort,
+				database);
 
 		Map<String, Object> credentials = new HashMap<String, Object>();
 		credentials.put("uri", dbURL);
+		credentials.put("username", username);
+		credentials.put("password", password);
+		credentials.put("host", host.getIp());
+		credentials.put("port", host.getPort());
+		credentials.put("database", serviceInstance.getId());
 
 		return credentials;
 	}
