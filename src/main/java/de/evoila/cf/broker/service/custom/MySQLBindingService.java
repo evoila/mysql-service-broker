@@ -80,9 +80,9 @@ public class MySQLBindingService extends BindingServiceImpl {
 		credentials.put("uri", dbURL);
 		credentials.put("username", username);
 		credentials.put("password", password);
-		credentials.put("host", host.getIp());
-		credentials.put("port", host.getPort());
-		credentials.put("database", serviceInstance.getId());
+		credentials.put("host", hostIp);
+		credentials.put("port", hostPort);
+		credentials.put("database", database);
 
 		return credentials;
 	}
