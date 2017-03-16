@@ -21,7 +21,7 @@ import de.evoila.cf.cpi.existing.ExistingServiceFactory;
  *
  */
 @Service
-@ConditionalOnProperty(prefix="existing.endpoint", name={"host","port","username","password","database"},havingValue="")
+@ConditionalOnProperty(prefix="existing.endpoint", name={"hosts","port","username","password","database"},havingValue="")
 public class MySQLExistingServiceFactory extends ExistingServiceFactory {
 	
 	
