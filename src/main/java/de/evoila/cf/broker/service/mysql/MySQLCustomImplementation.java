@@ -6,6 +6,7 @@ package de.evoila.cf.broker.service.mysql;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -104,16 +105,17 @@ public class MySQLCustomImplementation implements CustomExistingService {
 		}
 	}
 	
-	public CustomExistingServiceConnection connection(String host, int port, String database, String username, String password) throws SQLException {
+	public CustomExistingServiceConnection connection(List<String> hosts, int port, String database, String username, String password) throws SQLException {
 		MySQLDbService jdbcService = new MySQLDbService();
 		if (jdbcService.isConnected())
 			return jdbcService;
 		else {
-			Assert.notNull(host, "Host may not be null");
+			Assert.notNull(hosts, "Host may not be null");
 			Assert.notNull(database, "Database may not be null");
 			Assert.notNull(username, "Username may not be null");
 			Assert.notNull(password, "Password may not be null");
 	
+			String host = hosts.get(0);
 			final boolean isConnected = jdbcService.createConnection(host,
 					port, database, username, password);
 			if (isConnected)
