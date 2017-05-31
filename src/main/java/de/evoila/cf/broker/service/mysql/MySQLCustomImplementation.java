@@ -97,7 +97,7 @@ public class MySQLCustomImplementation implements CustomExistingService {
 			}
 	
 			final boolean isConnected = jdbcService.createConnection(host.getIp(),
-					host.getPort(), instanceId, null, password);
+					host.getPort(), instanceId, existingServiceFactory.getUsername(), password);
 			if (isConnected)
 				return jdbcService;
 			else
