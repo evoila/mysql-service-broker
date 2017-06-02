@@ -38,6 +38,7 @@ public class MySqlStackHandler extends ClusterStackHandler{
 	private StackMappingRepository stackMappingRepo;
 	
 	private MySqlParameterManager parameterManager;
+	
 	public MySqlStackHandler() {
 		super();
 		parameterManager = new MySqlParameterManager();
@@ -85,14 +86,14 @@ public class MySqlStackHandler extends ClusterStackHandler{
 		stackMappingRepo.save(stackMapping);
 
 		
-		List<String>[] responses = extractResponses(ipStack, PORTS_KEY, IP_ADRESS_KEY);
+		List<String>[] responses = extractResponses(ipStack, PORTS_KEY, IP_ADDRESS_KEY);
 		List<String> ips = responses[1];
 		List<String> ports = responses[0];
 		parameterManager.updatePorts(customParameters, ips, ports);
 		
 		for (int i = 0; i < ips.size(); i++) {
 			String ip = ips.get(i);
-			stackMapping.addServerAddress(new ServerAddress("node-" + i, ip, Integer.parseInt(ports.get(i))));
+			stackMapping.addServerAddress(new ServerAddress("node-" + i, ip, 3306));
 		}
 		stackMappingRepo.save(stackMapping);	
 	
@@ -148,7 +149,7 @@ public class MySqlStackHandler extends ClusterStackHandler{
 		String primary = accessTemplate(PRIMARY_TEMPLATE);
 		String secondaries = accessTemplate(SECONDARY_TEMPLATE);
 		
-		Map<String, String> files = new HashMap();
+		Map<String, String> files = new HashMap<String, String>();
 		files.put("primary.yaml", primary);
 		files.put("secondaries.yaml", secondaries);
 		

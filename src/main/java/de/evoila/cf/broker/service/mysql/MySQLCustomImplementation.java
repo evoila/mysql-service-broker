@@ -90,14 +90,16 @@ public class MySQLCustomImplementation implements CustomExistingService {
 			Assert.notNull(host.getPort(), "Port of ServiceInstance may not be null");
 			
 			String password = instanceId;
+			String username = instanceId;
 			String planId = serviceInstance.getPlanId();
 			Plan plan = serviceDefinitionRepository.getPlan(planId);
 			if(plan.getPlatform() == Platform.EXISTING_SERVICE) {
 				password = existingServiceFactory.getPassword();
+				username = existingServiceFactory.getUsername();
 			}
-	
+			
 			final boolean isConnected = jdbcService.createConnection(host.getIp(),
-					host.getPort(), instanceId, existingServiceFactory.getUsername(), password);
+					host.getPort(), instanceId, username, password);
 			if (isConnected)
 				return jdbcService;
 			else
