@@ -1,0 +1,114 @@
+heat_template_version: 2016-04-08
+description: Deployment Description for MariaDB-Galera Master (Script 2/3)
+parameters:
+  
+  image_id:
+    type: string
+    description: Image used for servers
+  key_name:
+    type: string
+    description: SSH key to connect to the servers
+  flavor:
+    type: string
+    description: flavor used by the servers
+  availability_zone:
+    type: string
+    description: Availability Zone of the nodes.
+
+  primary_ip:
+    type: string
+    description: IP of primary node.
+
+  secondary_hostname:
+    type: string
+    description: Hostname of the secondary node.
+  secondary_volume_id:
+    type: string
+    description: ID of the pre-created volume to be attached to the secondary node.
+  secondary_port:
+    type: string
+    description: Network-Port used by the secondary node.
+  secondary_ip:
+    type: string
+    description: IP of  secondary node.
+  secondaries_ip_list:
+    type: string
+    description: Network-IP comma seperate list from secondary nodes.
+
+  service_db:
+    type: string
+    description: Name of the Database.
+  admin_user:
+    type: string
+    description: Admin user for the service.
+  admin_password:
+    type: string
+    hidden: true
+
+
+resources:
+  volume_attachment_seondary:
+    type: OS::Cinder::VolumeAttachment
+    properties:
+      volume_id: { get_param: secondary_volume_id }
+      instance_uuid: { get_resource: service_prim }
+      mountpoint: /dev/vdb
+  service_prim:
+    type: OS::Nova::Server
+    properties:
+      flavor: { get_param: flavor }
+      image: { get_param: image_id }
+      availability_zone: { get_param: availability_zone }
+      key_name: { get_param: key_name }
+      name: { get_param: secondary_hostname }
+      networks:
+      - port: { get_param: secondary_port } 
+      user_data_format: RAW
+      user_data:
+        str_replace:
+          template: |
+            #!/bin/bash
+            mkdir -p /data
+            echo "/dev/vdb       /data       ext4    defaults     0 0" >> /etc/fstab
+            mkfs.ext4 /dev/vdb
+            mount -a
+
+            export REPOSITORY_MARIADB="https://bitbucket.org/meshstack/deployment-scripts-mariadb/raw/try/mariadb"
+            export REPOSITORY_MARIADB_CLUSTER="https://bitbucket.org/meshstack/deployment-scripts-mariadb/raw/try/mariadb/cluster"
+            export REPOSITORY_MONIT="https://bitbucket.org/meshstack/deployment-scripts-monit/raw/HEAD/monit"
+
+            wget $REPOSITORY_MARIADB/mariadb-template.sh --no-cache
+            wget $REPOSITORY_MARIADB_CLUSTER/mariadb-cluster-template.sh --no-cache
+
+            chmod +x mariadb-template.sh
+            chmod +x mariadb-cluster-template.sh
+
+            # use dummy log_host and log_ip deactivate in bash script
+            # ./mariadb-template.sh -u $admin_user -d $database_name -p $database_password -e openstack -l $log_host -m $log_port
+            ./mariadb-template.sh -u $admin_user -d $database_name -p $database_password -e openstack -l 127.0.0.1 -m 8080
+
+            ./mariadb-cluster-template.sh -u $admin_user -p $database_password -i $primary_ip -o $secondary_ip -j "$primary_ip,secondaries_ip_list" -a secondary
+
+            wc_notify --data-binary '{"status": "SUCCESS"}'
+
+          params:
+            $database_name: {get_param: service_db}
+            $admin_user: { get_param: admin_user}
+            $database_password: {get_param: admin_password}
+            $primary_ip: { get_param: primary_ip}
+            $secondaries_ip_list: { get_param: secondaries_ip_list}
+            $secondary_ip: { get_param: secondary_ip}
+
+            wc_notify: { get_attr: [  'wait_handle', 'curl_cli'] }
+
+  wait_handle:
+    type: OS::Heat::WaitConditionHandle
+  wait_condition:
+    type: OS::Heat::WaitCondition
+    properties:
+      handle: { get_resource: wait_handle }
+      count: 1
+      timeout: 600
+  wait_for_it:
+    type: OS::Heat::None
+    depends_on: wait_condition
