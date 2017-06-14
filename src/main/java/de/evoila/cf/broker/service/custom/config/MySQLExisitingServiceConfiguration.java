@@ -12,21 +12,7 @@ import de.evoila.cf.broker.service.custom.MySQLExistingServiceFactory;
  * @author Sebastian Böing, evoila GmbH
  *
  */
-
-
 @Configuration
 @EnableConfigurationProperties(value={MySQLExistingServiceFactory.class})
 public class MySQLExisitingServiceConfiguration {
-
 }
-
-
-/**
- * 
- */
-
-
-
-
-
-

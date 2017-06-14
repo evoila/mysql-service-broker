@@ -24,13 +24,11 @@ import de.evoila.cf.cpi.existing.ExistingServiceFactory;
 @ConditionalOnProperty(prefix="existing.endpoint", name={"hosts","port","username","password","database"},havingValue="")
 public class MySQLExistingServiceFactory extends ExistingServiceFactory {
 	
-	
 	@Autowired
-	private MySQLCustomImplementation mysql;
-	
+	private MySQLCustomImplementation mySQLCustomImplementation;
 	
 	protected CustomExistingService getCustomExistingService() {
-		return mysql;
+		return mySQLCustomImplementation;
 	}
 
 	public void createDatabase(MySQLDbService connection, String database) throws PlatformException {
