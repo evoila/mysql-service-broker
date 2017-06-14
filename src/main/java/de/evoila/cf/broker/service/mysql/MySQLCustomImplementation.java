@@ -30,26 +30,6 @@ import de.evoila.cf.cpi.existing.CustomExistingServiceConnection;
 @Service
 public class MySQLCustomImplementation implements CustomExistingService {
 
-	// public void initServiceInstance(ServiceInstance serviceInstance, String[]
-	// databases) throws SQLException {
-	// String serviceInstanceId = serviceInstance.getId();
-	// if (!jdbcService.isConnected()) {
-	// ServerAddress host = serviceInstance.getHosts().get(0);
-	// jdbcService.createConnection(serviceInstanceId, host.getIp(),
-	// host.getPort());
-	// }
-	// jdbcService.executeUpdate("CREATE ROLE \"" + serviceInstanceId + "\"");
-	// for (String database : databases) {
-	// jdbcService.executeUpdate("CREATE DATABASE \"" + database + "\" OWNER \""
-	// + serviceInstanceId + "\"");
-	// }
-	// }
-	//
-	// public void deleteRole(String instanceId) throws SQLException {
-	// jdbcService.checkValidUUID(instanceId);
-	// jdbcService.executeUpdate("DROP ROLE IF EXISTS \"" + instanceId + "\"");
-	// }
-	
 	@Autowired
 	private ServiceDefinitionRepository serviceDefinitionRepository;
 	
