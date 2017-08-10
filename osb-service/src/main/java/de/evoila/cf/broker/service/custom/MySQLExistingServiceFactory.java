@@ -3,25 +3,24 @@
  */
 package de.evoila.cf.broker.service.custom;
 
-import java.sql.SQLException;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Service;
-
 import de.evoila.cf.broker.exception.PlatformException;
 import de.evoila.cf.broker.service.mysql.MySQLCustomImplementation;
 import de.evoila.cf.broker.service.mysql.jdbc.MySQLDbService;
 import de.evoila.cf.cpi.existing.CustomExistingService;
 import de.evoila.cf.cpi.existing.CustomExistingServiceConnection;
 import de.evoila.cf.cpi.existing.ExistingServiceFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Service;
+
+import java.sql.SQLException;
 
 /**
  * @author Christian Brinker, evoila.
  *
  */
 @Service
-@ConditionalOnProperty(prefix="existing.endpoint", name={"hosts","port","username","password","database"},havingValue="")
+@ConditionalOnProperty(prefix="existing.endpoint", name={"port","username","password","database"},havingValue="")
 public class MySQLExistingServiceFactory extends ExistingServiceFactory {
 	
 	@Autowired
