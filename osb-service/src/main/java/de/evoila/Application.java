@@ -3,9 +3,8 @@
  */
 package de.evoila;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import de.evoila.cf.cpi.custom.props.DomainBasedCustomPropertyHandler;
+import de.evoila.cf.cpi.custom.props.MySQLCustomPropertyHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,8 +14,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.util.Assert;
 
-import de.evoila.cf.cpi.custom.props.DomainBasedCustomPropertyHandler;
-import de.evoila.cf.cpi.custom.props.MySQLCustomPropertyHandler;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 
@@ -25,6 +24,7 @@ import de.evoila.cf.cpi.custom.props.MySQLCustomPropertyHandler;
  */
 @SpringBootApplication
 @EnableMongoRepositories(basePackages={"de.evoila.cf.cpi.openstack.custom", "de.evoila.cf.broker.persistence.mongodb.repository"})
+//@EnableAutoConfiguration(exclude = {RabbitAutoConfiguration.class, BusAutoConfiguration.class})
 public class Application {
 
 	@Bean(name = "customProperties")
