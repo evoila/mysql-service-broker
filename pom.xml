@@ -21,7 +21,8 @@
 		<module>osb-persistence</module>
 		<module>osb-deployment</module>
 		<module>osb-service</module>
-	</modules>
+        <module>osb-backup-core</module>
+    </modules>
 
 	<properties>
 		<resource.dir>${basedir}/../osb-service/src/main/resources</resource.dir>
@@ -55,22 +56,22 @@
 		</repository>
 	</repositories>
 
-	<pluginRepositories>
-		<pluginRepository>
-			<id>Maven Central</id>
-			<name>Central Maven Repository</name>
-			<url>http://repo1.maven.org/maven2/</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</pluginRepository>
-		<pluginRepository>
-			<id>spring-snapshots</id>
-			<url>http://repo.spring.io/snapshot</url>
-		</pluginRepository>
-		<pluginRepository>
-			<id>spring-milestones</id>
-			<url>http://repo.spring.io/milestone</url>
-		</pluginRepository>
-	</pluginRepositories>
+		<pluginRepositories>
+			<pluginRepository>
+				<id>Maven Central</id>
+				<name>Central Maven Repository</name>
+				<url>http://repo1.maven.org/maven2/</url>
+				<snapshots>
+					<enabled>false</enabled>
+				</snapshots>
+			</pluginRepository>
+			<pluginRepository>
+				<id>spring-snapshots</id>
+				<url>http://repo.spring.io/snapshot</url>
+			</pluginRepository>
+			<pluginRepository>
+				<id>spring-milestones</id>
+				<url>http://repo.spring.io/milestone</url>
+			</pluginRepository>
+		</pluginRepositories>
 </project>

@@ -66,7 +66,6 @@
 			<artifactId>guava</artifactId>
 			<version>21.0</version>
 		</dependency>
-
 		<dependency>
 			<groupId>de.evoila.cf.broker</groupId>
 			<artifactId>model</artifactId>
@@ -83,6 +82,15 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>de.evoila.cf.broker</groupId>
+			<artifactId>backup-model</artifactId>
+			<version>1.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.amqp</groupId>
+			<artifactId>spring-rabbit</artifactId>
 		</dependency>
 	</dependencies>
 
