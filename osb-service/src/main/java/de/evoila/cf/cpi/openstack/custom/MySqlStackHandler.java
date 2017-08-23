@@ -3,10 +3,13 @@
  */
 package de.evoila.cf.cpi.openstack.custom;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import de.evoila.cf.broker.bean.OpenstackBean;
+import de.evoila.cf.broker.exception.PlatformException;
+import de.evoila.cf.broker.model.ServerAddress;
+import de.evoila.cf.broker.persistence.mongodb.repository.ClusterStackMapping;
+import de.evoila.cf.broker.persistence.mongodb.repository.StackMappingRepository;
+import de.evoila.cf.cpi.openstack.custom.cluster.ClusterParameterManager;
+import de.evoila.cf.cpi.openstack.custom.cluster.ClusterStackHandler;
 import org.openstack4j.model.heat.Stack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,13 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
-
-import de.evoila.cf.broker.exception.PlatformException;
-import de.evoila.cf.broker.model.ServerAddress;
-import de.evoila.cf.broker.persistence.mongodb.repository.ClusterStackMapping;
-import de.evoila.cf.broker.persistence.mongodb.repository.StackMappingRepository;
-import de.evoila.cf.cpi.openstack.custom.cluster.ClusterParameterManager;
-import de.evoila.cf.cpi.openstack.custom.cluster.ClusterStackHandler;
+import javax.annotation.PostConstruct;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Yannic Remmet, evoila
@@ -38,7 +38,19 @@ public class MySqlStackHandler extends ClusterStackHandler{
 	private StackMappingRepository stackMappingRepo;
 	
 	private MySqlParameterManager parameterManager;
-	
+
+	@Autowired
+	private OpenstackBean openstackBean;
+	private String keyPair;
+	private String subnetId;
+
+	@PostConstruct
+	private void initValues() {
+		keyPair = openstackBean.getKeypair();
+		subnetId = openstackBean.getSubnetId();
+	}
+
+
 	public MySqlStackHandler() {
 		super();
 		parameterManager = new MySqlParameterManager();
@@ -53,30 +65,28 @@ public class MySqlStackHandler extends ClusterStackHandler{
 		} else {
 			try {
 				super.deleteAndWait(stackMapping.getPrimaryStack());
-				Thread.sleep(20000);
+				Thread.sleep(60000);
 			} catch (PlatformException | InterruptedException e) {
 				log.error("Could not delete Stack " + stackMapping.getPrimaryStack() + " Instance " + internalId);
 				log.error(e.getMessage());
 			}
 			super.delete(stackMapping.getPortsStack());
 			super.delete(stackMapping.getVolumeStack());
-
+			stackMapping.getSecondaryStacks().forEach(s -> super.delete(s));
 			stackMappingRepo.delete(stackMapping);
 		}
 	}
 
 
-	/**
-	 * @param instanceId
-	 * @param customParameters
-	 * @param plan
-	 * @return
-	 * @throws PlatformException
-	 * @throws InterruptedException
-	 */
+
 	protected String createCluster(final String instanceId, final Map<String, String> customParameters)
 			throws PlatformException, InterruptedException {
 
+
+		if(customParameters.containsKey(ClusterParameterManager.NODE_NUMBER)){
+			int nodeNumber = Integer.parseInt(customParameters.get(ClusterParameterManager.NODE_NUMBER));
+		 	customParameters.put(ClusterParameterManager.SECONDARY_NUMBER, String.valueOf(nodeNumber-1));
+		}
 
 		ClusterStackMapping stackMapping = new ClusterStackMapping();
 		stackMapping.setId(instanceId);
@@ -88,6 +98,7 @@ public class MySqlStackHandler extends ClusterStackHandler{
 		
 		List<String>[] responses = extractResponses(ipStack, PORTS_KEY, IP_ADDRESS_KEY);
 		List<String> ips = responses[1];
+		List<String> ips_clone = responses[1];
 		List<String> ports = responses[0];
 		parameterManager.updatePorts(customParameters, ips, ports);
 		
@@ -109,6 +120,16 @@ public class MySqlStackHandler extends ClusterStackHandler{
 		Stack mainStack = mainStack(instanceId, customParameters);
 		
 		stackMapping.setPrimaryStack(mainStack.getId());
+
+		/*Stack loadBalancer = createLoadStack(instanceId, customParameters, ips_clone);
+		stackMapping.addSecondaryStack(loadBalancer.getId());
+
+
+		String ip = extractSingleValueResponses(loadBalancer , "vip_address")[0];
+		stackMapping.addServerAddress(new ServerAddress("default", ip, 33006));
+
+		*/
+
 		stackMappingRepo.save(stackMapping);
 
 		return stackMapping.getId();
@@ -128,14 +149,11 @@ public class MySqlStackHandler extends ClusterStackHandler{
 				ClusterParameterManager.PRIMARY_IP,
 				ClusterParameterManager.PRIMARY_PORT,
 				
-				ClusterParameterManager.SECONDARY_1_IP,
-				ClusterParameterManager.SECONDARY_1_PORT,
-				ClusterParameterManager.SECONDARY_1_VOLUME_ID,
-				
-				ClusterParameterManager.SECONDARY_2_IP,
-				ClusterParameterManager.SECONDARY_2_PORT,
-				ClusterParameterManager.SECONDARY_2_VOLUME_ID,
+				ClusterParameterManager.SECONDARY_IPS,
+				ClusterParameterManager.SECONDARY_VOLUME_IDS,
+				ClusterParameterManager.SECONDARY_PORTS,
 
+				ClusterParameterManager.SECONDARY_NUMBER,
 				ClusterParameterManager.SERVICE_DB,
 				ClusterParameterManager.ADMIN_USER,
 				ClusterParameterManager.ADMIN_PASSWORD
@@ -198,5 +216,21 @@ public class MySqlStackHandler extends ClusterStackHandler{
 		Stack preIpStack = stackProgressObserver.waitForStackCompletion(name);
 		return preIpStack;
 	}
+
+	private Stack createLoadStack(String instanceId, Map<String, String> customParameters,List<String> ips) throws PlatformException {
+		Map<String, String> parameters = new HashMap<String,String>();
+		String name = String.format(NAME_TEMPLATE, instanceId, "loadbalancer");
+		parameters.put("name", name);
+		parameters.put("subnet", subnetId);
+		parameters.put("port", Integer.toString(3306));
+		parameters.put("addresses", String.join(",",ips));
+
+		String loadBalancer = accessTemplate("/openstack/loadbalancer.yaml");
+		heatFluent.create(name, loadBalancer, parameters, false, 10l);
+		Stack stack = stackProgressObserver.waitForStackCompletion(name);
+		return stack;
+	}
+
+
 }
 	
