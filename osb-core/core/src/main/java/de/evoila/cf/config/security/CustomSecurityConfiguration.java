@@ -26,6 +26,7 @@ import org.springframework.security.web.authentication.logout.LogoutFilter;
  */
 @Configuration
 @EnableWebSecurity
+@Order(1)
 public class CustomSecurityConfiguration extends WebSecurityConfigurerAdapter  {
 
 	@Autowired
@@ -74,7 +75,7 @@ public class CustomSecurityConfiguration extends WebSecurityConfigurerAdapter  {
 
 
 	@Configuration
-	@Order(1)
+	@Order(5)
 	public static class ApiWebSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
 		@Bean
@@ -95,9 +96,8 @@ public class CustomSecurityConfiguration extends WebSecurityConfigurerAdapter  {
 			uaaRelyingPartyFilter.setSuccessHandler(new UaaRelyingPartyAuthenticationSuccessHandler());
 			uaaRelyingPartyFilter.setFailureHandler(new UaaRelyingPartyAuthenticationFailureHandler());
 
-			http.authorizeRequests().anyRequest().permitAll().and().csrf().disable();
 
-				http
+			http
 				.addFilterBefore(uaaRelyingPartyFilter, LogoutFilter.class)
 
 				.csrf().disable()
