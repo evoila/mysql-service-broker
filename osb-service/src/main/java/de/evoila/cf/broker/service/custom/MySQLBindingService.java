@@ -48,7 +48,7 @@ public class MySQLBindingService extends BindingServiceImpl {
 	 */
 	@Override
 	protected Map<String, Object> createCredentials(String bindingId, ServiceInstance serviceInstance,
-			ServerAddress host) throws ServiceBrokerException {
+			ServerAddress host, Plan plan) throws ServiceBrokerException {
 
 		MySQLDbService jdbcService = null;
 		try {
