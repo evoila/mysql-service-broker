@@ -35,7 +35,7 @@ public class MySQLDeploymentManager extends DeploymentManager {
         properties.putAll(plan.getMetadata());
         properties.putAll(customParameters);
 
-        HashMap<String, Object> manifestProperties = manifest.getInstance_groups()
+        Map<String, Object> manifestProperties = manifest.getInstance_groups()
                 .stream()
                 .filter(i -> i.getName().equals(INSTANCE_GROUP))
                 .findAny().get().getProperties();
@@ -54,6 +54,9 @@ public class MySQLDeploymentManager extends DeploymentManager {
             galeraHealthcheck = new HashMap<>();
             mysql.put("galera_healthcheck", galeraHealthcheck);
         }
+
+        instance.setUsername((String) mysql.get("admin_username"));
+        instance.setPassword(instance.getInternalId());
 
         mysqldExporter.put(MYSQLD_EXPORTER_PASSWORD, instance.getInternalId());
         mysql.put(MYSQL_ADMIN_PASSWORD, instance.getInternalId());
