@@ -3,21 +3,14 @@
  */
 package de.evoila.cf.broker.service.mysql.jdbc;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
+import de.evoila.cf.cpi.existing.CustomExistingServiceConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.evoila.cf.cpi.existing.CustomExistingServiceConnection;
+import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author Johannes Hiemer
@@ -41,7 +34,7 @@ public class MySQLDbService implements CustomExistingServiceConnection {
 		String user = (username == null) ? ROOT_USER : username;
 		try {
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
-			String url = "jdbc:mysql://" + host + ":" + port + "/" + database;
+			String url = "jdbc:mysql://" + host + ":" + port;
 			connection = DriverManager.getConnection(url, user, password);
 		} catch (ClassNotFoundException | SQLException | InstantiationException | IllegalAccessException e) {
 			log.info("Could not establish connection", e);

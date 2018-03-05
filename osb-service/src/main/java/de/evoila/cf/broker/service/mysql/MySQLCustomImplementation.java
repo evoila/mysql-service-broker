@@ -3,15 +3,6 @@
  */
 package de.evoila.cf.broker.service.mysql;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.sql.SQLException;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-
 import de.evoila.cf.broker.exception.ServiceBrokerException;
 import de.evoila.cf.broker.model.Plan;
 import de.evoila.cf.broker.model.Platform;
@@ -22,6 +13,14 @@ import de.evoila.cf.broker.service.custom.MySQLExistingServiceFactory;
 import de.evoila.cf.broker.service.mysql.jdbc.MySQLDbService;
 import de.evoila.cf.cpi.existing.CustomExistingService;
 import de.evoila.cf.cpi.existing.CustomExistingServiceConnection;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+
+import java.math.BigInteger;
+import java.security.SecureRandom;
+import java.sql.SQLException;
+import java.util.List;
 
 /**
  * @author Johannes Hiemer.
@@ -69,8 +68,8 @@ public class MySQLCustomImplementation implements CustomExistingService {
 			Assert.notNull(host.getIp(), "Host of ServiceInstance may not be null");
 			Assert.notNull(host.getPort(), "Port of ServiceInstance may not be null");
 			
-			String password = instanceId;
-			String username = instanceId;
+			String password = serviceInstance.getPassword();
+			String username = serviceInstance.getUsername();
 			String planId = serviceInstance.getPlanId();
 			Plan plan = serviceDefinitionRepository.getPlan(planId);
 			if(plan.getPlatform() == Platform.EXISTING_SERVICE) {
