@@ -1,0 +1,73 @@
+---
+name: mariadb
+
+releases:
+- name: osb-mariadb
+  version: latest
+- name: osb-monitoring
+  version: latest
+- name: osb-haproxy
+  version: latest
+
+stemcells:
+- alias: default
+  os: ubuntu-trusty
+  version: latest
+
+update:
+  canaries: 1
+  canary_watch_time: 10000-600000
+  update_watch_time: 10000-600000
+  max_in_flight: 1
+  serial: true
+
+instance_groups:
+- name: mariadb
+  instances: 2
+  networks: [{name: default}]
+  vm_type: default
+  stemcell: default
+  persistent_disk: 10000
+  jobs:
+  - name: mysql
+    release: osb-mariadb
+  - name: node_exporter
+    release: osb-monitoring
+  - name: mysqld_exporter
+    release: osb-monitoring
+  properties:
+    mysqld_exporter:
+      login: root
+    mysql:
+      remote_admin_access: true
+      admin_username: root
+
+- name: haproxy
+  instances: 1
+  vm_type: default
+  stemcell: default
+  networks:
+  - name: default
+  jobs:
+  - name: haproxy
+    release: osb-haproxy
+  - name: node_exporter
+    release: osb-monitoring
+  - name: haproxy_exporter
+    release: osb-monitoring
+  properties:
+    ha_proxy:
+      client_timeout: 10
+      server_timeout: 10
+      queue_timeout: 10
+      binding_ip: 0.0.0.0
+      disable_http: true
+      backend_port: 3306
+      stats_enable: true
+      stats_user: admin
+      stats_password: admin
+      tcp:
+        - name: mysql
+          balance: roundrobin
+          port: 3306
+          check: "check"
