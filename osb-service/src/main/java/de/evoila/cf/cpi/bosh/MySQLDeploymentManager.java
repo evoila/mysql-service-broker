@@ -14,11 +14,8 @@ import java.util.Map;
  */
 public class MySQLDeploymentManager extends DeploymentManager {
     public static final String INSTANCE_GROUP = "mariadb";
-    public static final String NODES = "nodes";
     public static final String DATA_PATH = "data_path";
     public static final String PORT = "port";
-    public static final String VM_TYPE = "vm_type";
-    public static final String DISK_TYPE = "disk_type";
     public static final String MYSQLD_EXPORTER_PASSWORD = "password";
     public static final String MYSQL_ADMIN_PASSWORD = "admin_password";
     public static final String MYSQL_CLUSTER_HEALTH_PASSWORD = "password";
@@ -72,16 +69,7 @@ public class MySQLDeploymentManager extends DeploymentManager {
             mysql.put(PORT, properties.get(PORT));
         }
 
-        if(properties.containsKey(NODES)){
-            manifest.getInstance_groups().get(0).setInstances((Integer) properties.get(NODES));
-        }
+        updateInstanceGroupConfiguration(manifest, plan);
 
-        if(properties.containsKey(VM_TYPE)){
-            manifest.getInstance_groups().get(0).setVm_type((String) properties.get(VM_TYPE));
-        }
-
-        if(properties.containsKey(DISK_TYPE)){
-            manifest.getInstance_groups().get(0).setVm_type((String) properties.get(DISK_TYPE));
-        }
     }
 }
