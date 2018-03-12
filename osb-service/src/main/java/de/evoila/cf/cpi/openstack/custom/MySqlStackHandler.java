@@ -7,7 +7,7 @@ import de.evoila.cf.broker.bean.OpenstackBean;
 import de.evoila.cf.broker.exception.PlatformException;
 import de.evoila.cf.broker.model.ServerAddress;
 import de.evoila.cf.broker.persistence.mongodb.repository.ClusterStackMapping;
-import de.evoila.cf.broker.persistence.mongodb.repository.StackMappingRepository;
+import de.evoila.cf.broker.persistence.mongodb.repository.ClusterStackMappingRepository;
 import de.evoila.cf.cpi.openstack.custom.cluster.ClusterParameterManager;
 import de.evoila.cf.cpi.openstack.custom.cluster.ClusterStackHandler;
 import org.openstack4j.model.heat.Stack;
@@ -35,7 +35,7 @@ public class MySqlStackHandler extends ClusterStackHandler{
 	private final Logger log = LoggerFactory.getLogger(MySqlStackHandler.class);
 
 	@Autowired
-	private StackMappingRepository stackMappingRepo;
+	private ClusterStackMappingRepository stackMappingRepo;
 	
 	private MySqlParameterManager parameterManager;
 
@@ -49,7 +49,6 @@ public class MySqlStackHandler extends ClusterStackHandler{
 		keyPair = openstackBean.getKeypair();
 		subnetId = openstackBean.getSubnetId();
 	}
-
 
 	public MySqlStackHandler() {
 		super();
