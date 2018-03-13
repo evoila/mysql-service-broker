@@ -69,7 +69,6 @@ public class MySQLDeploymentManager extends DeploymentManager {
             mysql.put(PORT, properties.get(PORT));
         }
 
-        updateInstanceGroupConfiguration(manifest, plan);
-
+        this.updateInstanceGroupConfiguration(manifest, plan);
     }
 }
