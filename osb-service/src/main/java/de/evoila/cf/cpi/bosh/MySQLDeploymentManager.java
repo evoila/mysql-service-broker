@@ -29,8 +29,10 @@ public class MySQLDeploymentManager extends DeploymentManager {
     @Override
     protected void replaceParameters(ServiceInstance instance, Manifest manifest, Plan plan, Map<String, String> customParameters) {
         HashMap<String, Object> properties = new HashMap<>();
-        properties.putAll(plan.getMetadata());
-        properties.putAll(customParameters);
+        if (customParameters != null && !customParameters.isEmpty())
+            properties.putAll(customParameters);
+
+        log.debug("Updating Deployment Manifest, replacing parameters");
 
         Map<String, Object> manifestProperties = manifest.getInstance_groups()
                 .stream()

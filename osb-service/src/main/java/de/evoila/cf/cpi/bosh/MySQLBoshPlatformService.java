@@ -40,12 +40,6 @@ public class MySQLBoshPlatformService extends BoshPlatformService {
 
     @Override
     protected void updateHosts(ServiceInstance instance, Plan plan, Deployment deployment) {
-        final int port;
-        if(plan.getMetadata().containsKey(MySQLDeploymentManager.PORT)) {
-            port = (int) plan.getMetadata().get(MySQLDeploymentManager.PORT);
-        } else {
-            port = defaultPort;
-        }
 
         List<Vm> vms = connection.connection().vms().listDetails(BoshPlatformService.DEPLOYMENT_NAME_PREFIX + instance.getId()).toBlocking().first();
         if(instance.getHosts() == null) {
@@ -55,7 +49,10 @@ public class MySQLBoshPlatformService extends BoshPlatformService {
         instance.getHosts().clear();
 
         vms.forEach(vm -> {
-            instance.getHosts().add(new ServerAddress("Host-" + vm.getIndex(), vm.getIps().get(0), port));
+            instance.getHosts().add(new ServerAddress("Host-" + vm.getIndex(), vm.getIps().get(0), defaultPort));
         });
     }
+
+    @Override
+    public void postDeleteInstance(ServiceInstance serviceInstance) { }
 }

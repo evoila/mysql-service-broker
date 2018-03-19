@@ -3,8 +3,6 @@
  */
 package de.evoila;
 
-import de.evoila.cf.cpi.custom.props.DomainBasedCustomPropertyHandler;
-import de.evoila.cf.cpi.custom.props.MySQLCustomPropertyHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -39,11 +37,6 @@ public class Application {
 
 	@Value("${openstack.log_host:localhost}")
 	private String logHost;
-
-	@Bean
-	public DomainBasedCustomPropertyHandler domainPropertyHandler() {
-		return new MySQLCustomPropertyHandler(logHost, logPort);
-	}
 
 	public static void main(String[] args) {
 		SpringApplication springApplication = new SpringApplication(Application.class);
