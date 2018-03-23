@@ -5,7 +5,6 @@ package de.evoila.cf.broker.custom.mysql;
 
 import de.evoila.cf.broker.model.ServerAddress;
 import de.evoila.cf.broker.util.ServiceInstanceUtils;
-import de.evoila.cf.cpi.existing.CustomExistingServiceConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,18 +17,18 @@ import java.util.Map;
  * @author Johannes Hiemer
  *
  */
-public class MySQLDbService implements CustomExistingServiceConnection {
+public class MySQLDbService {
 
 	private Logger log = LoggerFactory.getLogger(getClass());
 
 	private Connection connection;
 
-	public boolean createConnection(String username, String password, String database, List<ServerAddress> hosts) {
-        ServerAddress serverAddress = ServiceInstanceUtils.filteredServerAddress(hosts, "haproxy");
+	public boolean createConnection(String username, String password, String database, List<ServerAddress> serverAddresses) {
+        String connectionUrl = ServiceInstanceUtils.connectionUrl(serverAddresses);
 
-		try {
+        try {
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
-			String url = "jdbc:mysql://" + serverAddress.getIp() + ":" + serverAddress.getPort();
+			String url = "jdbc:mysql://" + connectionUrl;
 			connection = DriverManager.getConnection(url, username, password);
 		} catch (ClassNotFoundException | SQLException | InstantiationException | IllegalAccessException e) {
 			log.info("Could not establish connection", e);

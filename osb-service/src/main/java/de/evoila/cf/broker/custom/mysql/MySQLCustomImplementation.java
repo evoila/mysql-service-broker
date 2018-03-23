@@ -6,11 +6,8 @@ package de.evoila.cf.broker.custom.mysql;
 import de.evoila.cf.broker.bean.ExistingEndpointBean;
 import de.evoila.cf.broker.model.Plan;
 import de.evoila.cf.broker.model.Platform;
-import de.evoila.cf.broker.model.ServerAddress;
 import de.evoila.cf.broker.model.ServiceInstance;
 import de.evoila.cf.broker.repository.ServiceDefinitionRepository;
-import de.evoila.cf.cpi.existing.CustomExistingService;
-import de.evoila.cf.cpi.existing.CustomExistingServiceConnection;
 import de.evoila.de.evoila.cf.cpi.existing.MySQLExistingServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,15 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Johannes Hiemer.
  *
  */
 @Service
-public class MySQLCustomImplementation implements CustomExistingService {
+public class MySQLCustomImplementation {
 
     private Logger log = LoggerFactory.getLogger(MySQLCustomImplementation.class);
 
@@ -61,29 +56,9 @@ public class MySQLCustomImplementation implements CustomExistingService {
                         "admin", serviceInstance.getHosts());
             else if (plan.getPlatform() == Platform.EXISTING_SERVICE)
                 jdbcService.createConnection(existingEndpointBean.getUsername(), existingEndpointBean.getPassword(),
-                        existingEndpointBean.getDatabase(), existingEndpointBean.getHostsWithServerAddress());
+                        existingEndpointBean.getDatabase(), existingEndpointBean.getHosts());
             return  jdbcService;
 		}
-	}
-
-	public CustomExistingServiceConnection connection(List<String> hosts, int port, String database, String username, String password) throws SQLException {
-		MySQLDbService jdbcService = new MySQLDbService();
-
-        List<ServerAddress> serverAddresses = new ArrayList<>();
-        for (String address : hosts) {
-            serverAddresses.add(new ServerAddress("", address, port));
-            log.info("Opening connection to " + address + ":" + port);
-        }
-
-        jdbcService.createConnection(username, password, database, serverAddresses);
-        return jdbcService;
-	}
-
-	@Override
-	public void bindRoleToInstanceWithPassword(CustomExistingServiceConnection connection, String database,
-			String username, String password) throws Exception {
-		if(connection instanceof MySQLDbService)
-			this.bindRoleToDatabase((MySQLDbService) connection, username, password, database);
 	}
 
 }

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,8 +32,6 @@ public class MySQLBindingService extends BindingServiceImpl {
     private static String USERNAME = "user";
     private static String PASSWORD = "password";
     private static String DATABASE = "database";
-    private static String HOST = "host";
-    private static String PORT = "port";
 
     private RandomString usernameRandomString = new RandomString(10);
     private RandomString passwordRandomString = new RandomString(15);
@@ -43,19 +42,20 @@ public class MySQLBindingService extends BindingServiceImpl {
 	@Autowired
 	private MySQLCustomImplementation mysqlCustomImplementation;
 
+    @Override
+    public ServiceInstanceBinding getServiceInstanceBinding(String id) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    protected RouteBinding bindRoute(ServiceInstance serviceInstance, String route) {
+        throw new UnsupportedOperationException();
+    }
+
 	@Override
-	protected Map<String, Object> createCredentials(String bindingId, ServiceInstance serviceInstance,
-			ServerAddress host, Plan plan) throws ServiceBrokerException {
-
-		MySQLDbService jdbcService;
-		try {
-			jdbcService = mysqlCustomImplementation.connection(serviceInstance, plan);
-		} catch (SQLException e1) {
-			throw new ServiceBrokerException("Could not connect to database");
-		}
-
-		if (jdbcService == null)
-			throw new ServiceBrokerException("Could not connect to database");
+    protected Map<String, Object> createCredentials(String bindingId, ServiceInstance serviceInstance,
+            Plan plan, ServerAddress host) throws ServiceBrokerException {
+        MySQLDbService jdbcService = this.connection(serviceInstance, plan);
 
 		String username = usernameRandomString.nextString();
 		String password = passwordRandomString.nextString();
@@ -68,17 +68,19 @@ public class MySQLBindingService extends BindingServiceImpl {
 			throw new ServiceBrokerException("Could not update database");
 		}
 
-		ServerAddress serverAddress = ServiceInstanceUtils.filteredServerAddress(serviceInstance.getHosts(), "haproxy");
+        String endpoint = ServiceInstanceUtils.connectionUrl(serviceInstance.getHosts());
 
-		String dbURL = String.format("mysql://%s:%s@%s:%d/%s", username, password, serverAddress.getIp(), serverAddress.getPort(),
+        // When host is not empty, it is a service key
+        if (host != null)
+            endpoint = host.getIp() + ":" + host.getPort();
+
+        String dbURL = String.format("mysql://%s:%s@%s/%s", username, password, endpoint,
 				database);
 
 		Map<String, Object> credentials = new HashMap<String, Object>();
 		credentials.put(URI, dbURL);
 		credentials.put(USERNAME, username);
 		credentials.put(PASSWORD, password);
-		credentials.put(HOST, serverAddress.getIp());
-		credentials.put(PORT, serverAddress.getPort());
 		credentials.put(DATABASE, database);
 
 		return credentials;
@@ -104,14 +106,24 @@ public class MySQLBindingService extends BindingServiceImpl {
 		}
 	}
 
-	@Override
-	public ServiceInstanceBinding getServiceInstanceBinding(String id) {
-		throw new UnsupportedOperationException();
-	}
+    private MySQLDbService connection(ServiceInstance serviceInstance, Plan plan) {
+        MySQLDbService jdbcService = new MySQLDbService();
 
-	@Override
-	protected RouteBinding bindRoute(ServiceInstance serviceInstance, String route) {
-		throw new UnsupportedOperationException();
-	}
+        if(plan.getPlatform() == Platform.BOSH) {
+            List<ServerAddress> serverAddresses = serviceInstance.getHosts();
+
+            if (plan.getMetadata().getIngressInstanceGroup() != null &&
+                    plan.getMetadata().getIngressInstanceGroup().length() > 0)
+                serverAddresses = ServiceInstanceUtils.filteredServerAddress(serviceInstance.getHosts(),
+                        plan.getMetadata().getIngressInstanceGroup());
+
+            jdbcService.createConnection(serviceInstance.getUsername(), serviceInstance.getPassword(),
+                    "admin", serverAddresses);
+        } else if (plan.getPlatform() == Platform.EXISTING_SERVICE)
+            jdbcService.createConnection(existingEndpointBean.getUsername(), existingEndpointBean.getPassword(),
+                    existingEndpointBean.getDatabase(), serviceInstance.getHosts());
+
+        return jdbcService;
+    }
 
 }
