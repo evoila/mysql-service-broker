@@ -1,16 +1,18 @@
 /**
  * 
  */
-package de.evoila.cf.broker.service.mysql.jdbc;
+package de.evoila.cf.broker.custom.mysql;
 
+import de.evoila.cf.broker.model.ServerAddress;
+import de.evoila.cf.broker.util.ServiceInstanceUtils;
 import de.evoila.cf.cpi.existing.CustomExistingServiceConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * @author Johannes Hiemer
@@ -20,22 +22,15 @@ public class MySQLDbService implements CustomExistingServiceConnection {
 
 	private Logger log = LoggerFactory.getLogger(getClass());
 
-	private static String ROOT_USER = "root";
-
 	private Connection connection;
 
-	private String host;
+	public boolean createConnection(String username, String password, String database, List<ServerAddress> hosts) {
+        ServerAddress serverAddress = ServiceInstanceUtils.filteredServerAddress(hosts, "haproxy");
 
-	private int port;
-
-	public boolean createConnection(String host, int port, String database, String username, String password) {
-		this.host = host;
-		this.port = port;
-		String user = (username == null) ? ROOT_USER : username;
 		try {
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
-			String url = "jdbc:mysql://" + host + ":" + port;
-			connection = DriverManager.getConnection(url, user, password);
+			String url = "jdbc:mysql://" + serverAddress.getIp() + ":" + serverAddress.getPort();
+			connection = DriverManager.getConnection(url, username, password);
 		} catch (ClassNotFoundException | SQLException | InstantiationException | IllegalAccessException e) {
 			log.info("Could not establish connection", e);
 			return false;
@@ -45,14 +40,6 @@ public class MySQLDbService implements CustomExistingServiceConnection {
 
 	public boolean isConnected() throws SQLException {
 		return connection != null && !connection.isClosed();
-	}
-
-	public void checkValidUUID(String instanceId) throws SQLException {
-		UUID uuid = UUID.fromString(instanceId);
-
-		if (!instanceId.equals(uuid.toString())) {
-			throw new SQLException("UUID '" + instanceId + "' is not an UUID.");
-		}
 	}
 
 	public void executeUpdate(String query) throws SQLException {
@@ -141,13 +128,5 @@ public class MySQLDbService implements CustomExistingServiceConnection {
 			log.error(e.toString());
 			return null;
 		}
-	}
-
-	public String getHost() {
-		return host;
-	}
-
-	public int getPort() {
-		return port;
 	}
 }

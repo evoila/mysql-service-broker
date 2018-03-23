@@ -1,11 +1,11 @@
 /**
  * 
  */
-package de.evoila.cf.broker.service.custom;
+package de.evoila.de.evoila.cf.cpi.existing;
 
+import de.evoila.cf.broker.custom.mysql.MySQLDbService;
 import de.evoila.cf.broker.exception.PlatformException;
-import de.evoila.cf.broker.service.mysql.MySQLCustomImplementation;
-import de.evoila.cf.broker.service.mysql.jdbc.MySQLDbService;
+import de.evoila.cf.broker.custom.mysql.MySQLCustomImplementation;
 import de.evoila.cf.cpi.existing.CustomExistingService;
 import de.evoila.cf.cpi.existing.CustomExistingServiceConnection;
 import de.evoila.cf.cpi.existing.ExistingServiceFactory;

@@ -4,7 +4,6 @@ import de.evoila.cf.broker.bean.BoshProperties;
 import de.evoila.cf.broker.exception.PlatformException;
 import de.evoila.cf.broker.model.DashboardClient;
 import de.evoila.cf.broker.model.Plan;
-import de.evoila.cf.broker.model.ServerAddress;
 import de.evoila.cf.broker.model.ServiceInstance;
 import de.evoila.cf.broker.repository.PlatformRepository;
 import de.evoila.cf.broker.service.CatalogService;
@@ -39,19 +38,15 @@ public class MySQLBoshPlatformService extends BoshPlatformService {
     protected void runDeleteErrands(ServiceInstance instance, Deployment deployment, Observable<List<ErrandSummary>> errands) { }
 
     @Override
-    protected void updateHosts(ServiceInstance instance, Plan plan, Deployment deployment) {
+    protected void updateHosts (ServiceInstance serviceInstance, Plan plan, Deployment deployment) {
+        List<Vm> vms = super.getVms(serviceInstance);
+        if(serviceInstance.getHosts() == null)
+            serviceInstance.setHosts(new ArrayList<>());
+        serviceInstance.getHosts().clear();
 
-        List<Vm> vms = connection.connection().vms().listDetails(BoshPlatformService.DEPLOYMENT_NAME_PREFIX + instance.getId()).toBlocking().first();
-        if(instance.getHosts() == null) {
-            instance.setHosts(new ArrayList<>());
-        }
-
-        instance.getHosts().clear();
-
-        vms.forEach(vm -> {
-            instance.getHosts().add(new ServerAddress("Host-" + vm.getIndex(), vm.getIps().get(0), defaultPort));
-        });
+        vms.forEach(vm -> serviceInstance.getHosts().add(super.toServerAddress(vm, defaultPort)));
     }
+
 
     @Override
     public void postDeleteInstance(ServiceInstance serviceInstance) { }

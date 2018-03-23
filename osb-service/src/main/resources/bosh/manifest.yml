@@ -23,8 +23,9 @@ update:
 
 instance_groups:
 - name: mariadb
-  instances: 2
-  networks: [{name: default}]
+  instances: 3
+  networks:
+  - name: default
   vm_type: default
   stemcell: default
   persistent_disk: 10000

@@ -3,7 +3,6 @@
  */
 package de.evoila;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -35,18 +34,12 @@ public class Application {
 		return customProperties;
 	}
 
-	@Value("${openstack.log_port:0}")
-	private String logPort;
-
-	@Value("${openstack.log_host:localhost}")
-	private String logHost;
-
 	public static void main(String[] args) {
 		SpringApplication springApplication = new SpringApplication(Application.class);
 		springApplication.addListeners(new ApplicationPidFileWriter());
 		ApplicationContext ctx = springApplication.run(args);
 
-		Assert.notNull(ctx);
+		Assert.notNull(ctx, "ApplicationContext must not be null.");
 	}
 
 }

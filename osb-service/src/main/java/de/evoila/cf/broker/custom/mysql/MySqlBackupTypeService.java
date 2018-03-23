@@ -1,4 +1,4 @@
-package de.evoila.cf.broker.service.custom;
+package de.evoila.cf.broker.custom.mysql;
 
 import de.evoila.cf.broker.service.BackupTypeService;
 import de.evoila.cf.model.enums.DatabaseType;
