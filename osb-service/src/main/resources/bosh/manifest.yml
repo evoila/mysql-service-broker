@@ -2,7 +2,7 @@
 name: mariadb
 
 releases:
-- name: osb-mariadb
+- name: osb-mysql
   version: latest
 - name: osb-monitoring
   version: latest
@@ -26,12 +26,14 @@ instance_groups:
   instances: 3
   networks:
   - name: default
+  azs:
+  - z1
   vm_type: default
   stemcell: default
   persistent_disk: 10000
   jobs:
   - name: mysql
-    release: osb-mariadb
+    release: osb-mysql
   - name: node_exporter
     release: osb-monitoring
   - name: mysqld_exporter
@@ -47,6 +49,8 @@ instance_groups:
   instances: 1
   vm_type: default
   stemcell: default
+  azs:
+  - z1
   networks:
   - name: default
   jobs:

@@ -59,7 +59,7 @@ public class MySQLBindingService extends BindingServiceImpl {
 
 		String username = usernameRandomString.nextString();
 		String password = passwordRandomString.nextString();
-		String database = bindingId;
+		String database = serviceInstance.getId();
 		
 		try {
 			mysqlCustomImplementation.bindRoleToDatabase(jdbcService, username, password, database);

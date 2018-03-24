@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.evoila.de.evoila.cf.cpi.existing;
+package de.evoila.cf.cpi.existing;
 
 import de.evoila.cf.broker.bean.ExistingEndpointBean;
 import de.evoila.cf.broker.custom.mysql.MySQLCustomImplementation;
@@ -11,7 +11,6 @@ import de.evoila.cf.broker.model.Plan;
 import de.evoila.cf.broker.model.Platform;
 import de.evoila.cf.broker.model.ServiceInstance;
 import de.evoila.cf.broker.util.RandomString;
-import de.evoila.cf.cpi.existing.ExistingServiceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;

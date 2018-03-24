@@ -8,7 +8,7 @@ import de.evoila.cf.broker.model.Plan;
 import de.evoila.cf.broker.model.Platform;
 import de.evoila.cf.broker.model.ServiceInstance;
 import de.evoila.cf.broker.repository.ServiceDefinitionRepository;
-import de.evoila.de.evoila.cf.cpi.existing.MySQLExistingServiceFactory;
+import de.evoila.cf.cpi.existing.MySQLExistingServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
