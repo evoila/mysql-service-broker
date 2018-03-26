@@ -53,8 +53,8 @@ public class MySQLBindingService extends BindingServiceImpl {
     }
 
 	@Override
-    protected Map<String, Object> createCredentials(String bindingId, ServiceInstance serviceInstance,
-            Plan plan, ServerAddress host) throws ServiceBrokerException {
+    protected Map<String, Object> createCredentials(String bindingId, ServiceInstanceBindingRequest serviceInstanceBindingRequest,
+                                                    ServiceInstance serviceInstance, Plan plan, ServerAddress host) throws ServiceBrokerException {
         MySQLDbService jdbcService = this.connection(serviceInstance, plan);
 
 		String username = usernameRandomString.nextString();

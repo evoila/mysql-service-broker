@@ -15,7 +15,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,8 +39,6 @@ public class MySQLBoshPlatformService extends BoshPlatformService {
     @Override
     protected void updateHosts (ServiceInstance serviceInstance, Plan plan, Deployment deployment) {
         List<Vm> vms = super.getVms(serviceInstance);
-        if(serviceInstance.getHosts() == null)
-            serviceInstance.setHosts(new ArrayList<>());
         serviceInstance.getHosts().clear();
 
         vms.forEach(vm -> serviceInstance.getHosts().add(super.toServerAddress(vm, defaultPort)));
