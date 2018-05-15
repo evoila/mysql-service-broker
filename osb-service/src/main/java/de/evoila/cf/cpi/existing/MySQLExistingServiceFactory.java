@@ -61,7 +61,7 @@ public class MySQLExistingServiceFactory extends ExistingServiceFactory {
 	}
 
 	@Override
-    public ServiceInstance createInstance(ServiceInstance serviceInstance, Plan plan, Map<String, String> parameters) throws PlatformException {
+    public ServiceInstance createInstance(ServiceInstance serviceInstance, Plan plan, Map<String, Object> parameters) throws PlatformException {
         String username = usernameRandomString.nextString();
         String password = passwordRandomString.nextString();
 
