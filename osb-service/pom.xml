@@ -11,7 +11,7 @@
     </parent> 
 	<artifactId>osb-mysql</artifactId>
 	<packaging>jar</packaging>
-	<name>ssb-mysql</name>
+	<name>osb-mysql</name>
 	<version>1.2.0</version>
 
 	<properties>
