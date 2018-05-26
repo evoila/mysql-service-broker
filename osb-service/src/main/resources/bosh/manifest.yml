@@ -1,12 +1,12 @@
 ---
-name: mariadb
+name: osb-mariadb
 
 releases:
-- name: osb-mysql
+- name: osb-bosh-mysql
   version: latest
-- name: osb-monitoring
+- name: osb-bosh-monitoring
   version: latest
-- name: osb-haproxy
+- name: osb-bosh-haproxy
   version: latest
 
 stemcells:
@@ -28,16 +28,15 @@ instance_groups:
   - name: service
   azs:
   - z1
-  vm_type: default
+  vm_type: minimal
   stemcell: default
-  persistent_disk: 10000
   jobs:
   - name: mysql
-    release: osb-mysql
+    release: osb-bosh-mysql
   - name: node_exporter
-    release: osb-monitoring
+    release: osb-bosh-monitoring
   - name: mysqld_exporter
-    release: osb-monitoring
+    release: osb-bosh-monitoring
   properties:
     mysqld_exporter:
       login: root
@@ -47,7 +46,7 @@ instance_groups:
 
 - name: haproxy
   instances: 1
-  vm_type: default
+  vm_type: minimal
   stemcell: default
   azs:
   - z1
@@ -55,11 +54,11 @@ instance_groups:
   - name: service
   jobs:
   - name: haproxy
-    release: osb-haproxy
+    release: osb-bosh-haproxy
   - name: node_exporter
-    release: osb-monitoring
+    release: osb-bosh-monitoring
   - name: haproxy_exporter
-    release: osb-monitoring
+    release: osb-bosh-monitoring
   properties:
     ha_proxy:
       client_timeout: 10

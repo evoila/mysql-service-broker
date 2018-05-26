@@ -3,16 +3,17 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
+    <artifactId>osb-mysql</artifactId>
+    <packaging>jar</packaging>
+    <name>osb-mysql</name>
+    <version>1.2.0</version>
+
 	<parent>              
         <groupId>de.evoila.cf.broker</groupId>      
         <artifactId>repo-parent</artifactId>        
         <relativePath>../</relativePath>            
         <version>1.2.0</version>                    
     </parent> 
-	<artifactId>osb-mysql</artifactId>
-	<packaging>jar</packaging>
-	<name>osb-mysql</name>
-	<version>1.2.0</version>
 
 	<properties>
 		<core.version>1.2.0</core.version>

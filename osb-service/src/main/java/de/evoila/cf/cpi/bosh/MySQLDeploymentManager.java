@@ -69,7 +69,7 @@ public class MySQLDeploymentManager extends DeploymentManager {
         database.put("password", password);
         databases.add(database);
 
-        mysql.put("seeded_databases", databases);
+        //mysql.put("seeded_databases", databases);
 
         serviceInstance.setUsername((String) mysql.get("admin_username"));
         serviceInstance.setPassword(password);
