@@ -5,9 +5,11 @@ import de.evoila.cf.model.enums.DatabaseType;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MySqlBackupTypeService implements BackupTypeService{
+public class MySQLBackupTypeService implements BackupTypeService {
+
     @Override
     public DatabaseType getType () {
         return DatabaseType.MySQL;
     }
+
 }

@@ -6,7 +6,6 @@ package de.evoila;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration;
 import org.springframework.boot.system.ApplicationPidFileWriter;
 import org.springframework.cloud.bus.BusAutoConfiguration;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -24,7 +23,7 @@ import java.util.Map;
  */
 @RefreshScope
 @SpringBootApplication
-@EnableAutoConfiguration(exclude = {RabbitAutoConfiguration.class, BusAutoConfiguration.class})
+@EnableAutoConfiguration(exclude = {BusAutoConfiguration.class})
 public class Application {
 
 	@Bean(name = "customProperties")
