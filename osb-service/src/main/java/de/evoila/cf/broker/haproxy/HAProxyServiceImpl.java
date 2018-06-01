@@ -17,7 +17,6 @@ import java.util.List;
  * @author Rene Schollmeyer
  *
  */
-
 @Service
 @ConditionalOnBean(HAProxyConfiguration.class)
 public class HAProxyServiceImpl extends HAProxyService {
@@ -29,6 +28,6 @@ public class HAProxyServiceImpl extends HAProxyService {
 	
 	@Override
 	public List<String> getOptions(ServerAddress serverAddress) {
-		return new ArrayList<String>();
+		return new ArrayList<>();
 	}
 }

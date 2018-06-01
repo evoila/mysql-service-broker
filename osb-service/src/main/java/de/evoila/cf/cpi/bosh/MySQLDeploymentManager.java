@@ -1,6 +1,7 @@
 package de.evoila.cf.cpi.bosh;
 
 import de.evoila.cf.broker.bean.BoshProperties;
+import de.evoila.cf.broker.custom.mysql.MySQLUtils;
 import de.evoila.cf.broker.model.Plan;
 import de.evoila.cf.broker.model.ServiceInstance;
 import de.evoila.cf.broker.util.RandomString;
@@ -17,6 +18,7 @@ import java.util.Map;
  */
 public class MySQLDeploymentManager extends DeploymentManager {
 
+    private RandomString randomStringUsername = new RandomString(10);
     private RandomString randomStringPassword = new RandomString(15);
 
     public static final String INSTANCE_GROUP = "mariadb";
@@ -61,17 +63,17 @@ public class MySQLDeploymentManager extends DeploymentManager {
         }
 
         String password = randomStringPassword.nextString();
+        String username = randomStringUsername.nextString();
 
         List<Map<String, String>> databases = new ArrayList<>();
         Map<String, String> database = new HashMap<>();
-        database.put("name", serviceInstance.getId());
-        database.put("username", (String) mysql.get("admin_username"));
+        database.put("name", MySQLUtils.dbName(serviceInstance.getId()));
+        database.put("username", username);
         database.put("password", password);
         databases.add(database);
+        mysql.put("seeded_databases", databases);
 
-        //mysql.put("seeded_databases", databases);
-
-        serviceInstance.setUsername((String) mysql.get("admin_username"));
+        serviceInstance.setUsername(username);
         serviceInstance.setPassword(password);
 
         mysqldExporter.put(MYSQLD_EXPORTER_PASSWORD, password);

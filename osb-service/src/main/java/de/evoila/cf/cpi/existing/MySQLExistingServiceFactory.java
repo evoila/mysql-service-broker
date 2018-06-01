@@ -6,6 +6,7 @@ package de.evoila.cf.cpi.existing;
 import de.evoila.cf.broker.bean.ExistingEndpointBean;
 import de.evoila.cf.broker.custom.mysql.MySQLCustomImplementation;
 import de.evoila.cf.broker.custom.mysql.MySQLDbService;
+import de.evoila.cf.broker.custom.mysql.MySQLUtils;
 import de.evoila.cf.broker.exception.PlatformException;
 import de.evoila.cf.broker.model.Plan;
 import de.evoila.cf.broker.model.Platform;
@@ -57,7 +58,7 @@ public class MySQLExistingServiceFactory extends ExistingServiceFactory {
     public void deleteInstance(ServiceInstance serviceInstance, Plan plan) throws PlatformException {
         MySQLDbService mySQLDbService = this.connection(serviceInstance, plan);
 
-        deleteDatabase(mySQLDbService, serviceInstance.getId());
+        deleteDatabase(mySQLDbService, MySQLUtils.dbName(serviceInstance.getId()));
 	}
 
 	@Override
@@ -70,7 +71,7 @@ public class MySQLExistingServiceFactory extends ExistingServiceFactory {
 
         MySQLDbService mySQLDbService = this.connection(serviceInstance, plan);
 
-        createDatabase(mySQLDbService, serviceInstance.getId());
+        createDatabase(mySQLDbService, MySQLUtils.dbName(serviceInstance.getId()));
 
         return serviceInstance;
 	}

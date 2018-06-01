@@ -4,9 +4,6 @@
 package de.evoila.cf.broker.custom.mysql;
 
 import de.evoila.cf.broker.bean.ExistingEndpointBean;
-import de.evoila.cf.broker.model.Plan;
-import de.evoila.cf.broker.model.Platform;
-import de.evoila.cf.broker.model.ServiceInstance;
 import de.evoila.cf.broker.repository.ServiceDefinitionRepository;
 import de.evoila.cf.cpi.existing.MySQLExistingServiceFactory;
 import org.slf4j.Logger;
@@ -43,22 +40,6 @@ public class MySQLCustomImplementation {
 
 	public void unbindRoleFromDatabase(MySQLDbService jdbcService, String username) throws SQLException {
 		jdbcService.executeUpdate("DROP USER \"" + username + "\"");
-	}
-
-	public MySQLDbService connection(ServiceInstance serviceInstance, Plan plan) throws SQLException {
-		MySQLDbService jdbcService = new MySQLDbService();
-		if (jdbcService.isConnected())
-			return jdbcService;
-		else {
-
-            if(plan.getPlatform() == Platform.BOSH)
-                jdbcService.createConnection(serviceInstance.getUsername(), serviceInstance.getPassword(),
-                        "admin", serviceInstance.getHosts());
-            else if (plan.getPlatform() == Platform.EXISTING_SERVICE)
-                jdbcService.createConnection(existingEndpointBean.getUsername(), existingEndpointBean.getPassword(),
-                        existingEndpointBean.getDatabase(), existingEndpointBean.getHosts());
-            return  jdbcService;
-		}
 	}
 
 }

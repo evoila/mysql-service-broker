@@ -59,7 +59,7 @@ public class MySQLBindingService extends BindingServiceImpl {
 
 		String username = usernameRandomString.nextString();
 		String password = passwordRandomString.nextString();
-		String database = serviceInstance.getId();
+		String database = MySQLUtils.dbName(serviceInstance.getId());
 		
 		try {
 			mysqlCustomImplementation.bindRoleToDatabase(jdbcService, username, password, database);
@@ -89,11 +89,7 @@ public class MySQLBindingService extends BindingServiceImpl {
 	@Override
 	protected void deleteBinding(ServiceInstanceBinding binding, ServiceInstance serviceInstance, Plan plan) throws ServiceBrokerException {
 		MySQLDbService jdbcService;
-		try {
-			jdbcService = mysqlCustomImplementation.connection(serviceInstance, plan);
-		} catch (SQLException e1) {
-			throw new ServiceBrokerException("Could not connect to database");
-		}
+		jdbcService = this.connection(serviceInstance, plan);
 
 		if (jdbcService == null)
 			throw new ServiceBrokerException("Could not connect to database");
@@ -118,7 +114,7 @@ public class MySQLBindingService extends BindingServiceImpl {
                         plan.getMetadata().getIngressInstanceGroup());
 
             jdbcService.createConnection(serviceInstance.getUsername(), serviceInstance.getPassword(),
-                    "admin", serverAddresses);
+                    MySQLUtils.dbName(serviceInstance.getId()), serverAddresses);
         } else if (plan.getPlatform() == Platform.EXISTING_SERVICE)
             jdbcService.createConnection(existingEndpointBean.getUsername(), existingEndpointBean.getPassword(),
                     existingEndpointBean.getDatabase(), serviceInstance.getHosts());
