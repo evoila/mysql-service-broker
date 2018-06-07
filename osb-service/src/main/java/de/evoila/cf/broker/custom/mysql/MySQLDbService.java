@@ -37,10 +37,6 @@ public class MySQLDbService {
 		return true;
 	}
 
-	public boolean isConnected() throws SQLException {
-		return connection != null && !connection.isClosed();
-	}
-
 	public void executeUpdate(String query) throws SQLException {
 		Statement statement = connection.createStatement();
 
@@ -62,7 +58,7 @@ public class MySQLDbService {
 			ResultSetMetaData resultMetaData = result.getMetaData();
 			int columns = resultMetaData.getColumnCount();
 
-			Map<String, String> resultMap = new HashMap<String, String>(columns);
+			Map<String, String> resultMap = new HashMap<>(columns);
 
 			if (result.next()) {
 				for (int i = 1; i <= columns; i++) {

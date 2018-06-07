@@ -73,7 +73,7 @@ public class MySQLDeploymentManager extends DeploymentManager {
         databases.add(database);
         mysql.put("seeded_databases", databases);
 
-        serviceInstance.setUsername(username);
+        serviceInstance.setUsername("root");
         serviceInstance.setPassword(password);
 
         mysqldExporter.put(MYSQLD_EXPORTER_PASSWORD, password);

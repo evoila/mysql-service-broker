@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -55,7 +54,7 @@ public class MySQLBindingService extends BindingServiceImpl {
 	@Override
     protected Map<String, Object> createCredentials(String bindingId, ServiceInstanceBindingRequest serviceInstanceBindingRequest,
                                                     ServiceInstance serviceInstance, Plan plan, ServerAddress host) throws ServiceBrokerException {
-        MySQLDbService jdbcService = this.connection(serviceInstance, plan);
+        MySQLDbService jdbcService = this.mysqlCustomImplementation.connection(serviceInstance, plan);
 
 		String username = usernameRandomString.nextString();
 		String password = passwordRandomString.nextString();
@@ -89,7 +88,7 @@ public class MySQLBindingService extends BindingServiceImpl {
 	@Override
 	protected void deleteBinding(ServiceInstanceBinding binding, ServiceInstance serviceInstance, Plan plan) throws ServiceBrokerException {
 		MySQLDbService jdbcService;
-		jdbcService = this.connection(serviceInstance, plan);
+		jdbcService = this.mysqlCustomImplementation.connection(serviceInstance, plan);
 
 		if (jdbcService == null)
 			throw new ServiceBrokerException("Could not connect to database");
@@ -101,25 +100,5 @@ public class MySQLBindingService extends BindingServiceImpl {
 			throw new ServiceBrokerException("Could not remove from database");
 		}
 	}
-
-    private MySQLDbService connection(ServiceInstance serviceInstance, Plan plan) {
-        MySQLDbService jdbcService = new MySQLDbService();
-
-        if(plan.getPlatform() == Platform.BOSH) {
-            List<ServerAddress> serverAddresses = serviceInstance.getHosts();
-
-            if (plan.getMetadata().getIngressInstanceGroup() != null &&
-                    plan.getMetadata().getIngressInstanceGroup().length() > 0)
-                serverAddresses = ServiceInstanceUtils.filteredServerAddress(serviceInstance.getHosts(),
-                        plan.getMetadata().getIngressInstanceGroup());
-
-            jdbcService.createConnection(serviceInstance.getUsername(), serviceInstance.getPassword(),
-                    MySQLUtils.dbName(serviceInstance.getId()), serverAddresses);
-        } else if (plan.getPlatform() == Platform.EXISTING_SERVICE)
-            jdbcService.createConnection(existingEndpointBean.getUsername(), existingEndpointBean.getPassword(),
-                    existingEndpointBean.getDatabase(), serviceInstance.getHosts());
-
-        return jdbcService;
-    }
 
 }
