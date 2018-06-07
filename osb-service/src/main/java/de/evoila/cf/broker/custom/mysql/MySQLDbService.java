@@ -54,17 +54,13 @@ public class MySQLDbService {
 		Statement statement = connection.createStatement();
 
 		try {
+            Map<String, String> resultMap = new HashMap<>();
 			ResultSet result = statement.executeQuery(query);
-			ResultSetMetaData resultMetaData = result.getMetaData();
-			int columns = resultMetaData.getColumnCount();
 
-			Map<String, String> resultMap = new HashMap<>(columns);
-
-			if (result.next()) {
-				for (int i = 1; i <= columns; i++) {
-					resultMap.put(resultMetaData.getColumnName(i), result.getString(i));
-				}
-			}
+            String column = "database";
+            while(result.next()) {
+                resultMap.put(result.getString(column), result.getString(column));
+            }
 
 			return resultMap;
 		} catch (SQLException e) {
