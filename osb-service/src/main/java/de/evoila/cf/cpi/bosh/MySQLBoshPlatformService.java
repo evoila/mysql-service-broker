@@ -12,6 +12,7 @@ import io.bosh.client.deployments.Deployment;
 import io.bosh.client.errands.ErrandSummary;
 import io.bosh.client.vms.Vm;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
@@ -26,8 +27,8 @@ import java.util.Optional;
 public class MySQLBoshPlatformService extends BoshPlatformService {
     private static final int defaultPort = 3306;
 
-    public MySQLBoshPlatformService(PlatformRepository repository, CatalogService catalogService, ServicePortAvailabilityVerifier availabilityVerifier, BoshProperties boshProperties, Optional<DashboardClient> dashboardClient) {
-        super(repository, catalogService, availabilityVerifier, boshProperties, dashboardClient, new MySQLDeploymentManager(boshProperties));
+    public MySQLBoshPlatformService(PlatformRepository repository, CatalogService catalogService, ServicePortAvailabilityVerifier availabilityVerifier, BoshProperties boshProperties, Optional<DashboardClient> dashboardClient, Environment environment) {
+        super(repository, catalogService, availabilityVerifier, boshProperties, dashboardClient, new MySQLDeploymentManager(boshProperties, environment));
     }
 
     public void runCreateErrands(ServiceInstance instance, Plan plan, Deployment deployment, Observable<List<ErrandSummary>> errands) throws PlatformException {  }
