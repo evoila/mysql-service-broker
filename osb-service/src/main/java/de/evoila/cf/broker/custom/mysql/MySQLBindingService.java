@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,6 +31,8 @@ public class MySQLBindingService extends BindingServiceImpl {
     private static String URI = "uri";
     private static String USERNAME = "user";
     private static String PASSWORD = "password";
+    private static String HOST = "host";
+    private static String PORT = "port";
     private static String DATABASE = "database";
 
     private RandomString usernameRandomString = new RandomString(10);
@@ -67,7 +70,9 @@ public class MySQLBindingService extends BindingServiceImpl {
 			throw new ServiceBrokerException("Could not update database");
 		}
 
-        String endpoint = ServiceInstanceUtils.connectionUrl(serviceInstance.getHosts());
+        List<ServerAddress> serverAddresses = ServiceInstanceUtils.filteredServerAddress(serviceInstance.getHosts(),
+                plan.getMetadata().getIngressInstanceGroup());
+        String endpoint = ServiceInstanceUtils.connectionUrl(serverAddresses);
 
         // When host is not empty, it is a service key
         if (host != null)
@@ -78,6 +83,8 @@ public class MySQLBindingService extends BindingServiceImpl {
 
 		Map<String, Object> credentials = new HashMap<String, Object>();
 		credentials.put(URI, dbURL);
+        credentials.put(HOST, endpoint.split(":")[0]);
+        credentials.put(PORT, endpoint.split(":")[1]);
 		credentials.put(USERNAME, username);
 		credentials.put(PASSWORD, password);
 		credentials.put(DATABASE, database);
