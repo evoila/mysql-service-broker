@@ -7,6 +7,7 @@ import de.evoila.cf.broker.model.ServiceInstance;
 import de.evoila.cf.broker.util.RandomString;
 import de.evoila.cf.cpi.bosh.deployment.DeploymentManager;
 import de.evoila.cf.cpi.bosh.deployment.manifest.Manifest;
+import org.springframework.core.env.Environment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,8 +31,8 @@ public class MySQLDeploymentManager extends DeploymentManager {
     public static final String GALERA_ENDPOINT_PASSWORD = "endpoint_password";
     public static final String GALERA_DB_PASSWORD = "db_password";
 
-    public MySQLDeploymentManager(BoshProperties properties) {
-        super(properties);
+    public MySQLDeploymentManager(BoshProperties properties, Environment environment) {
+        super(properties, environment);
     }
 
     @Override
