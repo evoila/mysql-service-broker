@@ -32,7 +32,7 @@ public class MySQLDeploymentManager extends DeploymentManager {
     public static final String GALERA_DB_PASSWORD = "db_password";
 
     public MySQLDeploymentManager(BoshProperties properties, Environment environment) {
-        super(properties,  environment);
+        super(properties, environment);
     }
 
     @Override

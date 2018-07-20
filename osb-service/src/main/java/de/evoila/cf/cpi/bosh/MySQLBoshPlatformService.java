@@ -1,7 +1,6 @@
 package de.evoila.cf.cpi.bosh;
 
 import de.evoila.cf.broker.bean.BoshProperties;
-import de.evoila.cf.broker.exception.PlatformException;
 import de.evoila.cf.broker.model.DashboardClient;
 import de.evoila.cf.broker.model.Plan;
 import de.evoila.cf.broker.model.ServiceInstance;
@@ -27,13 +26,17 @@ import java.util.Optional;
 public class MySQLBoshPlatformService extends BoshPlatformService {
     private static final int defaultPort = 3306;
 
-    public MySQLBoshPlatformService(PlatformRepository repository, CatalogService catalogService, ServicePortAvailabilityVerifier availabilityVerifier, BoshProperties boshProperties, Optional<DashboardClient> dashboardClient, Environment environment) {
-        super(repository, catalogService, availabilityVerifier, boshProperties, dashboardClient, new MySQLDeploymentManager(boshProperties, environment));
+    public MySQLBoshPlatformService(PlatformRepository repository, CatalogService catalogService,
+                                    ServicePortAvailabilityVerifier availabilityVerifier, BoshProperties boshProperties,
+                                    Optional<DashboardClient> dashboardClient, Environment environment) {
+        super(repository, catalogService, availabilityVerifier,
+                boshProperties, dashboardClient,
+                new MySQLDeploymentManager(boshProperties, environment));
     }
 
-    public void runCreateErrands(ServiceInstance instance, Plan plan, Deployment deployment, Observable<List<ErrandSummary>> errands) throws PlatformException {  }
+    public void runCreateErrands(ServiceInstance instance, Plan plan, Deployment deployment, Observable<List<ErrandSummary>> errands) {}
 
-    protected void runUpdateErrands(ServiceInstance instance, Plan plan, Deployment deployment, Observable<List<ErrandSummary>> errands) throws PlatformException {  }
+    protected void runUpdateErrands(ServiceInstance instance, Plan plan, Deployment deployment, Observable<List<ErrandSummary>> errands) {}
 
     protected void runDeleteErrands(ServiceInstance instance, Deployment deployment, Observable<List<ErrandSummary>> errands) { }
 
@@ -44,7 +47,6 @@ public class MySQLBoshPlatformService extends BoshPlatformService {
 
         vms.forEach(vm -> serviceInstance.getHosts().add(super.toServerAddress(vm, defaultPort)));
     }
-
 
     @Override
     public void postDeleteInstance(ServiceInstance serviceInstance) { }
