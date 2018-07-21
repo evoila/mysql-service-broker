@@ -25,7 +25,9 @@ instance_groups:
 - name: mariadb
   instances: 3
   networks:
-  - name: default
+  - name: service
+  azs:
+  - z1
   vm_type: minimal
   stemcell: default
   jobs:
@@ -47,7 +49,9 @@ instance_groups:
   vm_type: minimal
   stemcell: default
   networks:
-  - name: default
+  - name: service
+  azs:
+  - z1
   jobs:
   - name: haproxy
     release: osb-bosh-haproxy
