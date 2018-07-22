@@ -96,7 +96,7 @@ public class MySQLBindingService extends BindingServiceImpl {
 	}
 
 	@Override
-	protected void deleteBinding(ServiceInstanceBinding binding, ServiceInstance serviceInstance, Plan plan) throws ServiceBrokerException {
+	protected void unbindService(ServiceInstanceBinding binding, ServiceInstance serviceInstance, Plan plan) throws ServiceBrokerException {
 		MySQLDbService jdbcService;
 		jdbcService = this.mysqlCustomImplementation.connection(serviceInstance, plan);
 
