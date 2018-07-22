@@ -15,9 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Johannes Hiemer.
@@ -30,10 +28,8 @@ public class MySQLBindingService extends BindingServiceImpl {
 
     private static String URI = "uri";
     private static String USERNAME = "user";
-    private static String PASSWORD = "password";
-    private static String HOST = "host";
-    private static String PORT = "port";
     private static String DATABASE = "database";
+    private static String NAME = "name";
 
     private RandomString usernameRandomString = new RandomString(10);
     private RandomString passwordRandomString = new RandomString(15);
@@ -67,27 +63,34 @@ public class MySQLBindingService extends BindingServiceImpl {
 			mysqlCustomImplementation.bindRoleToDatabase(jdbcService, username, password, database);
 		} catch (SQLException e) {
 			log.error(e.toString());
-			throw new ServiceBrokerException("Could not update database");
+			throw new ServiceBrokerException("Could not update Database to create Service Binding");
 		}
 
-        List<ServerAddress> serverAddresses = ServiceInstanceUtils.filteredServerAddress(serviceInstance.getHosts(),
+        List<ServerAddress> serverAddresses = null;
+		if (plan.getMetadata().getIngressInstanceGroup() != null && host == null)
+            serverAddresses = ServiceInstanceUtils.filteredServerAddress(serviceInstance.getHosts(),
                 plan.getMetadata().getIngressInstanceGroup());
+		else if (host != null)
+		    serverAddresses = Arrays.asList(new ServerAddress("service-key-haproxy", host.getIp(), host.getPort()));
+
+
+		if (serverAddresses == null || serverAddresses.size() == 0)
+            throw new ServiceBrokerException("Could not find any Service Backends to create Service Binding");
+
+
         String endpoint = ServiceInstanceUtils.connectionUrl(serverAddresses);
 
-        // When host is not empty, it is a service key
-        if (host != null)
-            endpoint = host.getIp() + ":" + host.getPort();
+        // This needs to be done here and can't be generalized due to the fact that each backend
+        // may have a different URL setup
+		Map<String, Object> configurations = new HashMap<>();
+        configurations.put(URI, String.format("mysql://%s:%s@%s/%s", username, password, endpoint, database));
+        configurations.put(DATABASE, database);
+        configurations.put(NAME, database);
 
-        String dbURL = String.format("mysql://%s:%s@%s/%s", username, password, endpoint,
-				database);
-
-		Map<String, Object> credentials = new HashMap<String, Object>();
-		credentials.put(URI, dbURL);
-        credentials.put(HOST, endpoint.split(":")[0]);
-        credentials.put(PORT, endpoint.split(":")[1]);
-		credentials.put(USERNAME, username);
-		credentials.put(PASSWORD, password);
-		credentials.put(DATABASE, database);
+        Map<String, Object> credentials = ServiceInstanceUtils.bindingObject(serviceInstance.getHosts(),
+                username,
+                password,
+                configurations);
 
 		return credentials;
 	}
