@@ -58,7 +58,7 @@ public class MySQLBindingService extends BindingServiceImpl {
 		String username = usernameRandomString.nextString();
 		String password = passwordRandomString.nextString();
 		String database = MySQLUtils.dbName(serviceInstance.getId());
-		
+
 		try {
 			mysqlCustomImplementation.bindRoleToDatabase(jdbcService, username, password, database);
 		} catch (SQLException e) {
@@ -67,22 +67,25 @@ public class MySQLBindingService extends BindingServiceImpl {
 		}
 
         List<ServerAddress> serverAddresses = null;
-		if (plan.getMetadata().getIngressInstanceGroup() != null && host == null)
-            serverAddresses = ServiceInstanceUtils.filteredServerAddress(serviceInstance.getHosts(),
-                plan.getMetadata().getIngressInstanceGroup());
-		else if (host != null)
-		    serverAddresses = Arrays.asList(new ServerAddress("service-key-haproxy", host.getIp(), host.getPort()));
+        if (plan.getPlatform() == Platform.BOSH && plan.getMetadata() != null) {
+            if (plan.getMetadata().getIngressInstanceGroup() != null && host == null)
+                serverAddresses = ServiceInstanceUtils.filteredServerAddress(serviceInstance.getHosts(),
+                        plan.getMetadata().getIngressInstanceGroup());
+            else if (plan.getMetadata().getIngressInstanceGroup() == null)
+                serverAddresses = serviceInstance.getHosts();
+        } else if (plan.getPlatform() == Platform.EXISTING_SERVICE) {
+            serverAddresses = existingEndpointBean.getHosts();
+        } else if (host != null)
+            serverAddresses = Arrays.asList(new ServerAddress("service-key-haproxy", host.getIp(), host.getPort()));
 
-
-		if (serverAddresses == null || serverAddresses.size() == 0)
+        if (serverAddresses == null || serverAddresses.size() == 0)
             throw new ServiceBrokerException("Could not find any Service Backends to create Service Binding");
-
 
         String endpoint = ServiceInstanceUtils.connectionUrl(serverAddresses);
 
         // This needs to be done here and can't be generalized due to the fact that each backend
         // may have a different URL setup
-		Map<String, Object> configurations = new HashMap<>();
+        Map<String, Object> configurations = new HashMap<>();
         configurations.put(URI, String.format("mysql://%s:%s@%s/%s", username, password, endpoint, database));
         configurations.put(DATABASE, database);
         configurations.put(NAME, database);
@@ -92,7 +95,7 @@ public class MySQLBindingService extends BindingServiceImpl {
                 password,
                 configurations);
 
-		return credentials;
+        return credentials;
 	}
 
 	@Override
