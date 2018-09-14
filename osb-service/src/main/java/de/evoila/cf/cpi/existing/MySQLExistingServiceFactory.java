@@ -4,7 +4,6 @@
 package de.evoila.cf.cpi.existing;
 
 import de.evoila.cf.broker.bean.ExistingEndpointBean;
-import de.evoila.cf.broker.custom.mysql.MySQLCustomImplementation;
 import de.evoila.cf.broker.custom.mysql.MySQLDbService;
 import de.evoila.cf.broker.custom.mysql.MySQLUtils;
 import de.evoila.cf.broker.exception.PlatformException;
@@ -31,14 +30,10 @@ public class MySQLExistingServiceFactory extends ExistingServiceFactory {
     RandomString usernameRandomString = new RandomString(10);
     RandomString passwordRandomString = new RandomString(15);
 
-	private MySQLCustomImplementation mySQLCustomImplementation;
-
     private ExistingEndpointBean existingEndpointBean;
 
-    public MySQLExistingServiceFactory(PlatformRepository platformRepository, ServicePortAvailabilityVerifier portAvailabilityVerifier, ExistingEndpointBean existingEndpointBean,
-                                       MySQLCustomImplementation mySQLCustomImplementation) {
+    public MySQLExistingServiceFactory(PlatformRepository platformRepository, ServicePortAvailabilityVerifier portAvailabilityVerifier, ExistingEndpointBean existingEndpointBean) {
         super(platformRepository, portAvailabilityVerifier, existingEndpointBean);
-        this.mySQLCustomImplementation = mySQLCustomImplementation;
         this.existingEndpointBean = existingEndpointBean;
     }
 
