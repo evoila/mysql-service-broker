@@ -13,7 +13,6 @@ import de.evoila.cf.broker.util.ServiceInstanceUtils;
 import de.evoila.cf.cpi.existing.MySQLExistingServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
@@ -28,14 +27,18 @@ public class MySQLCustomImplementation {
 
     private Logger log = LoggerFactory.getLogger(MySQLCustomImplementation.class);
 
-	@Autowired
 	private ServiceDefinitionRepository serviceDefinitionRepository;
-	
-	@Autowired(required=false)
-	private MySQLExistingServiceFactory existingServiceFactory;
 
-    @Autowired(required = false)
+	private MySQLExistingServiceFactory mySQLExistingServiceFactory;
+
     private ExistingEndpointBean existingEndpointBean;
+
+    public MySQLCustomImplementation(ServiceDefinitionRepository serviceDefinitionRepository, MySQLExistingServiceFactory mySQLExistingServiceFactory,
+                                     ExistingEndpointBean existingEndpointBean) {
+        this.serviceDefinitionRepository = serviceDefinitionRepository;
+        this.mySQLExistingServiceFactory = mySQLExistingServiceFactory;
+        this.existingEndpointBean = existingEndpointBean;
+    }
 
 	public void bindRoleToDatabase(MySQLDbService jdbcService, String username,
 			String password, String database) throws SQLException {

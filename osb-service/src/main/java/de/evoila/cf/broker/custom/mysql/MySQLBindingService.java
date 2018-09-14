@@ -6,16 +6,23 @@ package de.evoila.cf.broker.custom.mysql;
 import de.evoila.cf.broker.bean.ExistingEndpointBean;
 import de.evoila.cf.broker.exception.ServiceBrokerException;
 import de.evoila.cf.broker.model.*;
+import de.evoila.cf.broker.repository.BindingRepository;
+import de.evoila.cf.broker.repository.RouteBindingRepository;
+import de.evoila.cf.broker.repository.ServiceDefinitionRepository;
+import de.evoila.cf.broker.repository.ServiceInstanceRepository;
+import de.evoila.cf.broker.service.HAProxyService;
 import de.evoila.cf.broker.service.impl.BindingServiceImpl;
 import de.evoila.cf.broker.util.RandomString;
 import de.evoila.cf.broker.util.ServiceInstanceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Johannes Hiemer.
@@ -34,11 +41,16 @@ public class MySQLBindingService extends BindingServiceImpl {
     private RandomString usernameRandomString = new RandomString(10);
     private RandomString passwordRandomString = new RandomString(15);
 
-    @Autowired(required = false)
     private ExistingEndpointBean existingEndpointBean;
 
-	@Autowired
 	private MySQLCustomImplementation mysqlCustomImplementation;
+
+    public MySQLBindingService(BindingRepository bindingRepository, ServiceDefinitionRepository serviceDefinitionRepository, ServiceInstanceRepository serviceInstanceRepository,
+                               RouteBindingRepository routeBindingRepository, HAProxyService haProxyService, ExistingEndpointBean existingEndpointBean, MySQLCustomImplementation mySQLCustomImplementation) {
+        super(bindingRepository, serviceDefinitionRepository, serviceInstanceRepository, routeBindingRepository, haProxyService);
+        this.existingEndpointBean = existingEndpointBean;
+        this.mysqlCustomImplementation = mySQLCustomImplementation;
+    }
 
     @Override
     public ServiceInstanceBinding getServiceInstanceBinding(String id) {
