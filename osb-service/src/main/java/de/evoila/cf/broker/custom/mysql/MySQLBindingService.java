@@ -6,10 +6,10 @@ package de.evoila.cf.broker.custom.mysql;
 import de.evoila.cf.broker.bean.ExistingEndpointBean;
 import de.evoila.cf.broker.exception.ServiceBrokerException;
 import de.evoila.cf.broker.model.*;
-import de.evoila.cf.broker.repository.BindingRepository;
-import de.evoila.cf.broker.repository.RouteBindingRepository;
-import de.evoila.cf.broker.repository.ServiceDefinitionRepository;
-import de.evoila.cf.broker.repository.ServiceInstanceRepository;
+import de.evoila.cf.broker.model.catalog.ServerAddress;
+import de.evoila.cf.broker.model.catalog.plan.Plan;
+import de.evoila.cf.broker.repository.*;
+import de.evoila.cf.broker.service.AsyncBindingService;
 import de.evoila.cf.broker.service.HAProxyService;
 import de.evoila.cf.broker.service.impl.BindingServiceImpl;
 import de.evoila.cf.broker.util.RandomString;
@@ -45,16 +45,15 @@ public class MySQLBindingService extends BindingServiceImpl {
 
 	private MySQLCustomImplementation mysqlCustomImplementation;
 
-    public MySQLBindingService(BindingRepository bindingRepository, ServiceDefinitionRepository serviceDefinitionRepository, ServiceInstanceRepository serviceInstanceRepository,
-                               RouteBindingRepository routeBindingRepository, HAProxyService haProxyService, ExistingEndpointBean existingEndpointBean, MySQLCustomImplementation mySQLCustomImplementation) {
-        super(bindingRepository, serviceDefinitionRepository, serviceInstanceRepository, routeBindingRepository, haProxyService);
+    public MySQLBindingService(BindingRepository bindingRepository, ServiceDefinitionRepository serviceDefinitionRepository,
+                               ServiceInstanceRepository serviceInstanceRepository, RouteBindingRepository routeBindingRepository,
+                               HAProxyService haProxyService, ExistingEndpointBean existingEndpointBean,
+                               MySQLCustomImplementation mySQLCustomImplementation, JobRepository jobRepository,
+                               AsyncBindingService asyncBindingService, PlatformRepository platformRepository) {
+        super(bindingRepository, serviceDefinitionRepository, serviceInstanceRepository, routeBindingRepository,
+                haProxyService, jobRepository, asyncBindingService, platformRepository);
         this.existingEndpointBean = existingEndpointBean;
         this.mysqlCustomImplementation = mySQLCustomImplementation;
-    }
-
-    @Override
-    public ServiceInstanceBinding getServiceInstanceBinding(String id) {
-        throw new UnsupportedOperationException();
     }
 
     @Override
