@@ -1,9 +1,10 @@
 /**
- * 
+ *
  */
 package de.evoila.cf.broker.custom.mysql;
 
 import de.evoila.cf.broker.bean.ExistingEndpointBean;
+import de.evoila.cf.broker.exception.PlatformException;
 import de.evoila.cf.broker.model.Platform;
 import de.evoila.cf.broker.model.ServiceInstance;
 import de.evoila.cf.broker.model.catalog.ServerAddress;
@@ -27,9 +28,9 @@ public class MySQLCustomImplementation {
 
     private Logger log = LoggerFactory.getLogger(MySQLCustomImplementation.class);
 
-	private ServiceDefinitionRepository serviceDefinitionRepository;
+    private ServiceDefinitionRepository serviceDefinitionRepository;
 
-	private MySQLExistingServiceFactory mySQLExistingServiceFactory;
+    private MySQLExistingServiceFactory mySQLExistingServiceFactory;
 
     private ExistingEndpointBean existingEndpointBean;
 
@@ -40,21 +41,37 @@ public class MySQLCustomImplementation {
         this.existingEndpointBean = existingEndpointBean;
     }
 
-	public void bindRoleToDatabase(MySQLDbService jdbcService, String username,
-			String password, String database) throws SQLException {
-		jdbcService.executeUpdate("CREATE USER \"" + username + "\" IDENTIFIED BY \"" + password + "\"");
-		jdbcService.executeUpdate("GRANT ALL PRIVILEGES ON `" + database + "`.* TO `" + username + "`@\"%\"");
-		jdbcService.executeUpdate("FLUSH PRIVILEGES");
-	}
+    public void createDatabase(MySQLDbService jdbcService, String database) throws PlatformException {
+        try {
+            jdbcService.executeUpdate("CREATE DATABASE `" + database + "`");
+        } catch (SQLException e) {
+            throw new PlatformException("Could not create database", e);
+        }
+    }
 
-	public void unbindRoleFromDatabase(MySQLDbService jdbcService, String username) throws SQLException {
-		jdbcService.executeUpdate("DROP USER \"" + username + "\"");
-	}
+    public void deleteDatabase(MySQLDbService jdbcService, String database) throws PlatformException {
+        try {
+            jdbcService.executeUpdate("DROP DATABASE `" + database + "`");
+        } catch (SQLException e) {
+            throw new PlatformException("Could not create database", e);
+        }
+    }
+
+    public void bindRoleToDatabase(MySQLDbService jdbcService, String username,
+                                   String password, String database) throws SQLException {
+        jdbcService.executeUpdate("CREATE USER \"" + username + "\" IDENTIFIED BY \"" + password + "\"");
+        jdbcService.executeUpdate("GRANT ALL PRIVILEGES ON `" + database + "`.* TO `" + username + "`@\"%\"");
+        jdbcService.executeUpdate("FLUSH PRIVILEGES");
+    }
+
+    public void unbindRoleFromDatabase(MySQLDbService jdbcService, String username) throws SQLException {
+        jdbcService.executeUpdate("DROP USER \"" + username + "\"");
+    }
 
     public MySQLDbService connection(ServiceInstance serviceInstance, Plan plan) {
         MySQLDbService jdbcService = new MySQLDbService();
 
-        if(plan.getPlatform() == Platform.BOSH) {
+        if (plan.getPlatform() == Platform.BOSH) {
             List<ServerAddress> serverAddresses = serviceInstance.getHosts();
 
             if (plan.getMetadata().getIngressInstanceGroup() != null &&

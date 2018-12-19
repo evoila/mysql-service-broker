@@ -4,6 +4,7 @@
 package de.evoila.cf.cpi.existing;
 
 import de.evoila.cf.broker.bean.ExistingEndpointBean;
+import de.evoila.cf.broker.custom.mysql.MySQLCustomImplementation;
 import de.evoila.cf.broker.custom.mysql.MySQLDbService;
 import de.evoila.cf.broker.custom.mysql.MySQLUtils;
 import de.evoila.cf.broker.exception.PlatformException;
@@ -16,7 +17,6 @@ import de.evoila.cf.broker.util.RandomString;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLException;
 import java.util.Map;
 
 /**
@@ -32,34 +32,22 @@ public class MySQLExistingServiceFactory extends ExistingServiceFactory {
 
     private ExistingEndpointBean existingEndpointBean;
 
-    public MySQLExistingServiceFactory(PlatformRepository platformRepository, ServicePortAvailabilityVerifier portAvailabilityVerifier, ExistingEndpointBean existingEndpointBean) {
+    private MySQLCustomImplementation mysqlCustomImplementation;
+
+    public MySQLExistingServiceFactory(PlatformRepository platformRepository,
+                                       MySQLCustomImplementation mySQLCustomImplementation,
+                                       ServicePortAvailabilityVerifier portAvailabilityVerifier,
+                                       ExistingEndpointBean existingEndpointBean) {
         super(platformRepository, portAvailabilityVerifier, existingEndpointBean);
+        this.mysqlCustomImplementation = mySQLCustomImplementation;
         this.existingEndpointBean = existingEndpointBean;
     }
-
-    public void createDatabase(MySQLDbService connection, String database) throws PlatformException {
-		try {
-			connection.executeUpdate("CREATE DATABASE `" + database + "`");
-		} catch (SQLException e) {
-			log.error(e.toString());
-			throw new PlatformException("Could not add to database");
-		}
-	}
-
-	public void deleteDatabase(MySQLDbService connection, String database) throws PlatformException {
-		try {
-			connection.executeUpdate("DROP DATABASE `" + database + "`");
-		} catch (SQLException e) {
-			log.error(e.toString());
-			throw new PlatformException("Could not remove from database");
-		}
-	}
 
 	@Override
     public void deleteInstance(ServiceInstance serviceInstance, Plan plan) throws PlatformException {
         MySQLDbService mySQLDbService = this.connection(serviceInstance, plan);
 
-        deleteDatabase(mySQLDbService, MySQLUtils.dbName(serviceInstance.getId()));
+        mysqlCustomImplementation.deleteDatabase(mySQLDbService, MySQLUtils.dbName(serviceInstance.getId()));
 	}
 
 	@Override
@@ -72,7 +60,7 @@ public class MySQLExistingServiceFactory extends ExistingServiceFactory {
 
         MySQLDbService mySQLDbService = this.connection(serviceInstance, plan);
 
-        createDatabase(mySQLDbService, MySQLUtils.dbName(serviceInstance.getId()));
+        mysqlCustomImplementation.createDatabase(mySQLDbService, MySQLUtils.dbName(serviceInstance.getId()));
 
         return serviceInstance;
 	}
