@@ -87,8 +87,6 @@ public class BackupCustomServiceImpl implements BackupCustomService {
 
         } else
             throw new ServiceBrokerException("Creating items is not allowed in shared plans");
-
-
     }
 
 }

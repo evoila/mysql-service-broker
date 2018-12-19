@@ -9,9 +9,7 @@ import de.evoila.cf.broker.model.Platform;
 import de.evoila.cf.broker.model.ServiceInstance;
 import de.evoila.cf.broker.model.catalog.ServerAddress;
 import de.evoila.cf.broker.model.catalog.plan.Plan;
-import de.evoila.cf.broker.repository.ServiceDefinitionRepository;
 import de.evoila.cf.broker.util.ServiceInstanceUtils;
-import de.evoila.cf.cpi.existing.MySQLExistingServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -28,16 +26,9 @@ public class MySQLCustomImplementation {
 
     private Logger log = LoggerFactory.getLogger(MySQLCustomImplementation.class);
 
-    private ServiceDefinitionRepository serviceDefinitionRepository;
-
-    private MySQLExistingServiceFactory mySQLExistingServiceFactory;
-
     private ExistingEndpointBean existingEndpointBean;
 
-    public MySQLCustomImplementation(ServiceDefinitionRepository serviceDefinitionRepository, MySQLExistingServiceFactory mySQLExistingServiceFactory,
-                                     ExistingEndpointBean existingEndpointBean) {
-        this.serviceDefinitionRepository = serviceDefinitionRepository;
-        this.mySQLExistingServiceFactory = mySQLExistingServiceFactory;
+    public MySQLCustomImplementation(ExistingEndpointBean existingEndpointBean) {
         this.existingEndpointBean = existingEndpointBean;
     }
 
