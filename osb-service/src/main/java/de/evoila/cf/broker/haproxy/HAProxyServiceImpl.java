@@ -14,8 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Rene Schollmeyer
- *
+ * @author Rene Schollmeyer.
  */
 @Service
 @ConditionalOnBean(HAProxyConfiguration.class)

@@ -9,6 +9,7 @@ import de.evoila.cf.broker.model.Platform;
 import de.evoila.cf.broker.model.ServiceInstance;
 import de.evoila.cf.broker.model.catalog.ServerAddress;
 import de.evoila.cf.broker.model.catalog.plan.Plan;
+import de.evoila.cf.broker.model.credential.UsernamePasswordCredential;
 import de.evoila.cf.broker.util.ServiceInstanceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,6 @@ import java.util.List;
 
 /**
  * @author Johannes Hiemer.
- *
  */
 @Service
 public class MySQLCustomImplementation {
@@ -59,7 +59,7 @@ public class MySQLCustomImplementation {
         jdbcService.executeUpdate("DROP USER \"" + username + "\"");
     }
 
-    public MySQLDbService connection(ServiceInstance serviceInstance, Plan plan) {
+    public MySQLDbService connection(ServiceInstance serviceInstance, Plan plan, UsernamePasswordCredential usernamePasswordCredential) {
         MySQLDbService jdbcService = new MySQLDbService();
 
         if (plan.getPlatform() == Platform.BOSH) {
@@ -70,7 +70,7 @@ public class MySQLCustomImplementation {
                 serverAddresses = ServiceInstanceUtils.filteredServerAddress(serviceInstance.getHosts(),
                         plan.getMetadata().getIngressInstanceGroup());
 
-            jdbcService.createConnection(serviceInstance.getUsername(), serviceInstance.getPassword(),
+            jdbcService.createConnection(usernamePasswordCredential.getUsername(), usernamePasswordCredential.getPassword(),
                     MySQLUtils.dbName(serviceInstance.getId()), serverAddresses);
         } else if (plan.getPlatform() == Platform.EXISTING_SERVICE)
             jdbcService.createConnection(existingEndpointBean.getUsername(), existingEndpointBean.getPassword(),

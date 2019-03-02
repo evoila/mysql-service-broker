@@ -9,15 +9,20 @@ import de.evoila.cf.broker.exception.ServiceInstanceDoesNotExistException;
 import de.evoila.cf.broker.model.Platform;
 import de.evoila.cf.broker.model.ServiceInstance;
 import de.evoila.cf.broker.model.catalog.plan.Plan;
+import de.evoila.cf.broker.model.credential.UsernamePasswordCredential;
 import de.evoila.cf.broker.repository.ServiceDefinitionRepository;
 import de.evoila.cf.broker.repository.ServiceInstanceRepository;
 import de.evoila.cf.broker.service.BackupCustomService;
+import de.evoila.cf.security.credentials.CredentialStore;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author Johannes Hiemer.
+ */
 @Service
 public class BackupCustomServiceImpl implements BackupCustomService {
 
@@ -27,12 +32,16 @@ public class BackupCustomServiceImpl implements BackupCustomService {
 
     private ServiceDefinitionRepository serviceDefinitionRepository;
 
+    private CredentialStore credentialStore;
+
     public BackupCustomServiceImpl(ServiceInstanceRepository serviceInstanceRepository,
                                    MySQLCustomImplementation mysqlCustomImplementation,
-                                   ServiceDefinitionRepository serviceDefinitionRepository) {
+                                   ServiceDefinitionRepository serviceDefinitionRepository,
+                                   CredentialStore credentialStore) {
         this.serviceInstanceRepository = serviceInstanceRepository;
         this.mysqlCustomImplementation = mysqlCustomImplementation;
         this.serviceDefinitionRepository = serviceDefinitionRepository;
+        this.credentialStore = credentialStore;
     }
 
     @Override
@@ -48,7 +57,8 @@ public class BackupCustomServiceImpl implements BackupCustomService {
 
         Map<String, String> result = new HashMap<>();
         if (plan.getPlatform().equals(Platform.BOSH)) {
-            MySQLDbService mySQLDbService = mysqlCustomImplementation.connection(serviceInstance, plan);
+            UsernamePasswordCredential usernamePasswordCredential = credentialStore.getUser(serviceInstance, "root_credentials");
+            MySQLDbService mySQLDbService = mysqlCustomImplementation.connection(serviceInstance, plan, usernamePasswordCredential);
 
             try {
                 Map<String, String> databases = mySQLDbService.executeSelect("SHOW DATABASES");
@@ -63,30 +73,6 @@ public class BackupCustomServiceImpl implements BackupCustomService {
         }
 
         return result;
-    }
-
-    @Override
-    public void createItem(String serviceInstanceId, String name, Map<String, Object> parameters) throws ServiceInstanceDoesNotExistException,
-            ServiceDefinitionDoesNotExistException, ServiceBrokerException {
-        ServiceInstance instance = serviceInstanceRepository.getServiceInstance(serviceInstanceId);
-
-        if(instance == null || instance.getHosts().size() <= 0) {
-            throw new ServiceInstanceDoesNotExistException(serviceInstanceId);
-        }
-
-        Plan plan = serviceDefinitionRepository.getPlan(instance.getPlanId());
-
-        if (plan.getPlatform().equals(Platform.BOSH)) {
-            MySQLDbService mySQLDbService = mysqlCustomImplementation.connection(instance, plan);
-
-            try {
-                mysqlCustomImplementation.createDatabase(mySQLDbService, name);
-            } catch (Exception ex) {
-                throw new ServiceBrokerException("Could not create Database", ex);
-            }
-
-        } else
-            throw new ServiceBrokerException("Creating items is not allowed in shared plans");
     }
 
 }

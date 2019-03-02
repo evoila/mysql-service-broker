@@ -14,8 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author Johannes Hiemer
- *
+ * @author Johannes Hiemer.
  */
 public class MySQLDbService {
 
@@ -31,7 +30,7 @@ public class MySQLDbService {
 			String url = "jdbc:mysql://" + connectionUrl + "/" + database;
 			connection = DriverManager.getConnection(url, username, password);
 		} catch (ClassNotFoundException | SQLException | InstantiationException | IllegalAccessException e) {
-			log.info("Could not establish connection", e);
+			log.info("Could not establish client", e);
 			return false;
 		}
 		return true;

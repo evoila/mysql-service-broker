@@ -22,7 +22,7 @@ update:
   serial: true
 
 instance_groups:
-- name: mariadb
+- name: mysql
   instances: 3
   networks:
   - name: service
@@ -33,16 +33,22 @@ instance_groups:
   jobs:
   - name: mysql
     release: osb-bosh-mysql
+  - name: backup-agent
+    release: osb-bosh-mysql
   - name: node_exporter
     release: osb-bosh-monitoring
   - name: mysqld_exporter
     release: osb-bosh-monitoring
   properties:
+    backup_agent:
+      user: "backup"
+      password: "rulez"
     mysqld_exporter:
       login: root
     mysql:
-      remote_admin_access: true
-      admin_username: root
+      admin:
+        username: root
+        remote_access: true
 
 - name: haproxy
   instances: 1

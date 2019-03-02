@@ -4,9 +4,13 @@ import de.evoila.cf.broker.bean.BoshProperties;
 import de.evoila.cf.broker.custom.mysql.MySQLUtils;
 import de.evoila.cf.broker.model.ServiceInstance;
 import de.evoila.cf.broker.model.catalog.plan.Plan;
-import de.evoila.cf.broker.util.RandomString;
+import de.evoila.cf.broker.model.credential.PasswordCredential;
+import de.evoila.cf.broker.model.credential.UsernamePasswordCredential;
+import de.evoila.cf.broker.util.MapUtils;
+import de.evoila.cf.cpi.CredentialConstants;
 import de.evoila.cf.cpi.bosh.deployment.DeploymentManager;
 import de.evoila.cf.cpi.bosh.deployment.manifest.Manifest;
+import de.evoila.cf.security.credentials.CredentialStore;
 import org.springframework.core.env.Environment;
 
 import java.util.ArrayList;
@@ -15,82 +19,113 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by reneschollmeyer, evoila on 28.02.18.
+ * @author Rene Schollmeyer, Johannes Hiemer.
  */
 public class MySQLDeploymentManager extends DeploymentManager {
 
-    private RandomString randomStringUsername = new RandomString(10);
-    private RandomString randomStringPassword = new RandomString(15);
-
-    public static final String INSTANCE_GROUP = "mariadb";
-    public static final String DATA_PATH = "data_path";
-    public static final String PORT = "port";
+    public static final String INSTANCE_GROUP = "mysql";
     public static final String MYSQLD_EXPORTER_PASSWORD = "password";
-    public static final String MYSQL_ADMIN_PASSWORD = "admin_password";
+    public static final String MYSQL_DEFAULT_ADMIN_USERNAME = "root";
+    public static final String MYSQL_ADMIN_USERNAME = "username";
+    public static final String MYSQL_ADMIN_PASSWORD = "password";
+    public static final String MYSQL_ADMIN_REMOTE_ACCESS = "remote_access";
     public static final String MYSQL_CLUSTER_HEALTH_PASSWORD = "password";
     public static final String GALERA_ENDPOINT_PASSWORD = "endpoint_password";
     public static final String GALERA_DB_PASSWORD = "db_password";
 
-    public MySQLDeploymentManager(BoshProperties properties, Environment environment) {
+    private CredentialStore credentialStore;
+
+    public MySQLDeploymentManager(BoshProperties properties, Environment environment, CredentialStore credentialStore) {
         super(properties, environment);
+        this.credentialStore = credentialStore;
     }
 
     @Override
-    protected void replaceParameters(ServiceInstance serviceInstance, Manifest manifest, Plan plan, Map<String, Object> customParameters) {
+    protected void replaceParameters(ServiceInstance serviceInstance, Manifest manifest, Plan plan,
+                                     Map<String, Object> customParameters, boolean isUpdate) {
         HashMap<String, Object> properties = new HashMap<>();
-        if (customParameters != null && !customParameters.isEmpty())
-            properties.putAll(customParameters);
+        if (!isUpdate) {
+            if (customParameters != null && !customParameters.isEmpty())
+                properties.putAll(customParameters);
 
-        log.debug("Updating Deployment Manifest, replacing parameters");
+            log.debug("Updating Deployment Manifest, replacing parameters");
 
-        Map<String, Object> manifestProperties = manifest.getInstanceGroups()
-                .stream()
-                .filter(i -> i.getName().equals(INSTANCE_GROUP))
-                .findAny().get().getProperties();
+            Map<String, Object> manifestProperties = manifest.getInstanceGroups()
+                    .stream()
+                    .filter(i -> i.getName().equals(INSTANCE_GROUP))
+                    .findAny().get().getProperties();
 
-        HashMap<String, Object> mysqldExporter = (HashMap<String, Object>) manifestProperties.get("mysqld_exporter");
-        HashMap<String, Object> mysql = (HashMap<String, Object>) manifestProperties.get("mysql");
-        HashMap<String, Object> clusterHealth = (HashMap<String, Object>) mysql.get("cluster_health");
-        HashMap<String, Object> galeraHealthcheck = (HashMap<String, Object>) mysql.get("galera_healthcheck");
+            HashMap<String, Object> mysqldExporter = (HashMap<String, Object>) manifestProperties.get("mysqld_exporter");
+            HashMap<String, Object> mysql = (HashMap<String, Object>) manifestProperties.get("mysql");
 
-        if(clusterHealth == null) {
-            clusterHealth = new HashMap<>();
-            mysql.put("cluster_health", clusterHealth);
-        }
+            Map<String, Object> clusterHealth = new HashMap<>();
+            PasswordCredential galeraHealthPassword = credentialStore.createPassword(serviceInstance,
+                    CredentialConstants.GALERA_HEALTH_PASSWORD);
+            clusterHealth.put(MYSQL_CLUSTER_HEALTH_PASSWORD, galeraHealthPassword);
 
-        if(galeraHealthcheck == null) {
-            galeraHealthcheck = new HashMap<>();
-            mysql.put("galera_healthcheck", galeraHealthcheck);
-        }
+            HashMap<String, Object> cluster = new HashMap<>();
+            cluster.put("health", clusterHealth);
+            mysql.put("cluster", cluster);
 
-        String password = randomStringPassword.nextString();
-        String username = randomStringUsername.nextString();
+            Map<String, Object> healthCheck = new HashMap<>();
+            PasswordCredential galeraEndpointCredential = credentialStore.createPassword(serviceInstance,
+                    CredentialConstants.GALERA_ENDPOINT_PASSWORD);
+            healthCheck.put(GALERA_ENDPOINT_PASSWORD, galeraEndpointCredential.getPassword());
 
-        List<Map<String, String>> databases = new ArrayList<>();
-        Map<String, String> database = new HashMap<>();
-        database.put("name", MySQLUtils.dbName(serviceInstance.getId()));
-        database.put("username", username);
-        database.put("password", password);
-        databases.add(database);
-        mysql.put("seeded_databases", databases);
+            PasswordCredential galeraDbPassword = credentialStore.createPassword(serviceInstance,
+                    CredentialConstants.GALERA_DB_PASSWORD);
+            healthCheck.put(GALERA_DB_PASSWORD, galeraDbPassword.getPassword());
 
-        serviceInstance.setUsername("root");
-        serviceInstance.setPassword(password);
+            HashMap<String, Object> galera = new HashMap<>();
+            galera.put("healthcheck", healthCheck);
+            mysql.put("galera", galera);
 
-        mysqldExporter.put(MYSQLD_EXPORTER_PASSWORD, password);
-        mysql.put(MYSQL_ADMIN_PASSWORD, password);
-        clusterHealth.put(MYSQL_CLUSTER_HEALTH_PASSWORD, password);
-        galeraHealthcheck.put(GALERA_ENDPOINT_PASSWORD, password);
-        galeraHealthcheck.put(GALERA_DB_PASSWORD, password);
 
-        if(properties.containsKey(DATA_PATH)) {
-            mysql.put(DATA_PATH, properties.get(DATA_PATH));
-        }
+            UsernamePasswordCredential rootCredentials = credentialStore.createUser(serviceInstance,
+                    CredentialConstants.ROOT_CREDENTIALS, "root");
+            Map<String, Object> adminCredentials = new HashMap<>();
+            adminCredentials.put(MYSQL_ADMIN_USERNAME, rootCredentials.getUsername());
+            adminCredentials.put(MYSQL_ADMIN_PASSWORD, rootCredentials.getPassword());
+            adminCredentials.put(MYSQL_ADMIN_REMOTE_ACCESS, true);
+            mysql.put("admin", adminCredentials);
 
-        if(properties.containsKey(PORT)){
-            mysql.put(PORT, properties.get(PORT));
+            List<Map<String, String>> databases = new ArrayList<>();
+            Map<String, String> database = new HashMap<>();
+            database.put("name", MySQLUtils.dbName(serviceInstance.getId()));
+
+            UsernamePasswordCredential defaultUserCredential = credentialStore.createUser(serviceInstance,
+                    CredentialConstants.DEFAULT_DB_CREDENTIALS);
+            database.put("username", defaultUserCredential.getUsername());
+            database.put("password", defaultUserCredential.getPassword());
+            databases.add(database);
+            mysql.put("databases", databases);
+
+            PasswordCredential exporterPassword = credentialStore.createPassword(serviceInstance,
+                    CredentialConstants.EXPORTER_PASSWORD);
+            mysqldExporter.put(MYSQLD_EXPORTER_PASSWORD, exporterPassword.getPassword());
+
+
+        } else if (isUpdate && customParameters != null && !customParameters.isEmpty()) {
+            for (Map.Entry parameter : customParameters.entrySet()) {
+                Map<String, Object> manifestProperties = manifestProperties(parameter.getKey().toString(), manifest);
+
+                if (manifestProperties != null)
+                    MapUtils.deepMerge(manifestProperties, customParameters);
+            }
+
         }
 
         this.updateInstanceGroupConfiguration(manifest, plan);
+    }
+
+    private Map<String, Object> manifestProperties(String instanceGroup, Manifest manifest) {
+        return manifest
+                .getInstanceGroups()
+                .stream()
+                .filter(i -> {
+                    if (i.getName().equals(instanceGroup))
+                        return true;
+                    return false;
+                }).findFirst().get().getProperties();
     }
 }
