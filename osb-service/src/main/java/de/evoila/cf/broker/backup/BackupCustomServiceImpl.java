@@ -13,6 +13,7 @@ import de.evoila.cf.broker.model.credential.UsernamePasswordCredential;
 import de.evoila.cf.broker.repository.ServiceDefinitionRepository;
 import de.evoila.cf.broker.repository.ServiceInstanceRepository;
 import de.evoila.cf.broker.service.BackupCustomService;
+import de.evoila.cf.cpi.CredentialConstants;
 import de.evoila.cf.security.credentials.CredentialStore;
 import org.springframework.stereotype.Service;
 
@@ -57,7 +58,7 @@ public class BackupCustomServiceImpl implements BackupCustomService {
 
         Map<String, String> result = new HashMap<>();
         if (plan.getPlatform().equals(Platform.BOSH)) {
-            UsernamePasswordCredential usernamePasswordCredential = credentialStore.getUser(serviceInstance, "root_credentials");
+            UsernamePasswordCredential usernamePasswordCredential = credentialStore.getUser(serviceInstance, CredentialConstants.ROOT_CREDENTIALS);
             MySQLDbService mySQLDbService = mysqlCustomImplementation.connection(serviceInstance, plan, usernamePasswordCredential);
 
             try {
