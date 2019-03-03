@@ -5,6 +5,7 @@ import de.evoila.cf.broker.model.ServiceInstance;
 import de.evoila.cf.broker.model.catalog.plan.Plan;
 import de.evoila.cf.broker.repository.PlatformRepository;
 import de.evoila.cf.broker.service.availability.ServicePortAvailabilityVerifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
  * @author Johannes Hiemer.
  */
 @Service
+@ConditionalOnBean(KubernetesProperties.class)
 public class MySQLKubernetesPlatformService extends KubernetesPlatformService {
 
     public MySQLKubernetesPlatformService(PlatformRepository platformRepository,
