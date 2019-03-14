@@ -75,7 +75,6 @@ public class MySQLCustomImplementation {
         } else if (plan.getPlatform() == Platform.EXISTING_SERVICE)
             jdbcService.createConnection(existingEndpointBean.getUsername(), existingEndpointBean.getPassword(),
                     existingEndpointBean.getDatabase(), existingEndpointBean.getHosts());
-
         return jdbcService;
     }
 

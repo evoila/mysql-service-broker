@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 
 /**
- * @author Christian Brinker, Johannes Hiemer..
+ * @author Christian Brinker, Johannes Hiemer.
  */
 @Service
 @ConditionalOnBean(ExistingEndpointBean.class)
