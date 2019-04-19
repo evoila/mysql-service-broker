@@ -133,7 +133,8 @@ public class MySQLBindingService extends BindingServiceImpl {
 			throw new ServiceBrokerException("Could not connect to database");
 
 		try {
-			mysqlCustomImplementation.unbindRoleFromDatabase(jdbcService, usernamePasswordCredential.getUsername());
+		    UsernamePasswordCredential bindingUsernameAndPasswordCredential = credentialStore.getUser(serviceInstance, binding.getId());
+			mysqlCustomImplementation.unbindRoleFromDatabase(jdbcService, bindingUsernameAndPasswordCredential.getUsername());
 
 			credentialStore.deleteCredentials(serviceInstance, binding.getId());
 		} catch (SQLException e) {
