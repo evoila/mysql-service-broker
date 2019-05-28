@@ -16,8 +16,8 @@ import de.evoila.cf.security.credentials.CredentialStore;
 import de.evoila.cf.security.utils.RandomString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.sql.SQLException;
@@ -69,12 +69,6 @@ public class MySQLBindingService extends BindingServiceImpl {
 	@Override
     protected Map<String, Object> createCredentials(String bindingId, ServiceInstanceBindingRequest serviceInstanceBindingRequest,
                                                     ServiceInstance serviceInstance, Plan plan, ServerAddress host) throws ServiceBrokerException {
-        UsernamePasswordCredential usernamePasswordCredential = credentialStore.getUser(serviceInstance, CredentialConstants.ROOT_CREDENTIALS);
-        MySQLDbService jdbcService = this.mysqlCustomImplementation.connection(serviceInstance, plan, usernamePasswordCredential);
-
-        credentialStore.createUser(serviceInstance, bindingId);
-        UsernamePasswordCredential bindingUsernamePasswordCredential = credentialStore.getUser(serviceInstance, bindingId);
-
         String database = MySQLUtils.dbName(serviceInstance.getId());
         if (serviceInstanceBindingRequest.getParameters() != null) {
             String customBindingDatabase = (String) serviceInstanceBindingRequest.getParameters().get(DATABASE);
@@ -82,6 +76,15 @@ public class MySQLBindingService extends BindingServiceImpl {
             if (!StringUtils.isEmpty(customBindingDatabase))
                 database = customBindingDatabase;
         }
+
+        UsernamePasswordCredential usernamePasswordCredential = credentialStore.getUser(serviceInstance, CredentialConstants.ROOT_CREDENTIALS);
+        MySQLDbService jdbcService = this.mysqlCustomImplementation.connection(serviceInstance, plan, usernamePasswordCredential, "mysql");
+
+        List<ServerAddress> serverAddresses = ServiceInstanceUtils.filteredServerAddress(serviceInstance.getHosts(),
+                plan.getMetadata().getIngressInstanceGroup());
+
+        credentialStore.createUser(serviceInstance, bindingId);
+        UsernamePasswordCredential bindingUsernamePasswordCredential = credentialStore.getUser(serviceInstance, bindingId);
 
 		try {
 			mysqlCustomImplementation.bindRoleToDatabase(jdbcService, bindingUsernamePasswordCredential.getUsername(),
@@ -91,16 +94,7 @@ public class MySQLBindingService extends BindingServiceImpl {
 			throw new ServiceBrokerException("Could not update Database to create Service Binding");
 		}
 
-        List<ServerAddress> serverAddresses = null;
-        if (plan.getPlatform() == Platform.BOSH && plan.getMetadata() != null) {
-            if (plan.getMetadata().getIngressInstanceGroup() != null && host == null)
-                serverAddresses = ServiceInstanceUtils.filteredServerAddress(serviceInstance.getHosts(),
-                        plan.getMetadata().getIngressInstanceGroup());
-            else if (plan.getMetadata().getIngressInstanceGroup() == null)
-                serverAddresses = serviceInstance.getHosts();
-        } else if (plan.getPlatform() == Platform.EXISTING_SERVICE) {
-            serverAddresses = existingEndpointBean.getHosts();
-        } else if (host != null)
+        if (host != null)
             serverAddresses = Arrays.asList(new ServerAddress("service-key-haproxy", host.getIp(), host.getPort()));
 
         if (serverAddresses == null || serverAddresses.size() == 0)
@@ -116,7 +110,7 @@ public class MySQLBindingService extends BindingServiceImpl {
         configurations.put(DATABASE, database);
         configurations.put(NAME, database);
 
-        Map<String, Object> credentials = ServiceInstanceUtils.bindingObject(serviceInstance.getHosts(),
+        Map<String, Object> credentials = ServiceInstanceUtils.bindingObject(serverAddresses,
                 bindingUsernamePasswordCredential.getUsername(),
                 bindingUsernamePasswordCredential.getPassword(),
                 configurations);
@@ -127,7 +121,7 @@ public class MySQLBindingService extends BindingServiceImpl {
 	@Override
 	protected void unbindService(ServiceInstanceBinding binding, ServiceInstance serviceInstance, Plan plan) throws ServiceBrokerException {
         UsernamePasswordCredential usernamePasswordCredential = credentialStore.getUser(serviceInstance, CredentialConstants.ROOT_CREDENTIALS);
-		MySQLDbService jdbcService = this.mysqlCustomImplementation.connection(serviceInstance, plan, usernamePasswordCredential);
+		MySQLDbService jdbcService = this.mysqlCustomImplementation.connection(serviceInstance, plan, usernamePasswordCredential, "mysql");
 
 		if (jdbcService == null)
 			throw new ServiceBrokerException("Could not connect to database");

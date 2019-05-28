@@ -11,6 +11,7 @@ import de.evoila.cf.cpi.CredentialConstants;
 import de.evoila.cf.cpi.bosh.deployment.DeploymentManager;
 import de.evoila.cf.cpi.bosh.deployment.manifest.Manifest;
 import de.evoila.cf.security.credentials.CredentialStore;
+import de.evoila.cf.security.credentials.DefaultCredentialConstants;
 import org.springframework.core.env.Environment;
 
 import java.util.ArrayList;
@@ -57,6 +58,12 @@ public class MySQLDeploymentManager extends DeploymentManager {
 
             HashMap<String, Object> mysqldExporter = (HashMap<String, Object>) manifestProperties.get("mysqld_exporter");
             HashMap<String, Object> mysql = (HashMap<String, Object>) manifestProperties.get("mysql");
+            HashMap<String, Object> backupAgent = (HashMap<String, Object>) manifestProperties.get("backup_agent");
+
+            UsernamePasswordCredential backupAgentusernamePasswordCredential = credentialStore.createUser(serviceInstance,
+                    DefaultCredentialConstants.BACKUP_AGENT_CREDENTIALS);
+            backupAgent.put("username", backupAgentusernamePasswordCredential.getUsername());
+            backupAgent.put("password", backupAgentusernamePasswordCredential.getPassword());
 
             Map<String, Object> clusterHealth = new HashMap<>();
             PasswordCredential galeraHealthPassword = credentialStore.createPassword(serviceInstance,
@@ -88,6 +95,9 @@ public class MySQLDeploymentManager extends DeploymentManager {
             adminCredentials.put(MYSQL_ADMIN_PASSWORD, rootCredentials.getPassword());
             adminCredentials.put(MYSQL_ADMIN_REMOTE_ACCESS, true);
             mysql.put("admin", adminCredentials);
+
+            rootCredentials = credentialStore.getUser(serviceInstance, CredentialConstants.ROOT_CREDENTIALS);
+            credentialStore.createUser(serviceInstance, DefaultCredentialConstants.BACKUP_CREDENTIALS, rootCredentials.getUsername(), rootCredentials.getPassword());
 
             List<Map<String, String>> databases = new ArrayList<>();
             Map<String, String> database = new HashMap<>();

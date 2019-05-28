@@ -9,6 +9,7 @@ import de.evoila.cf.broker.service.CatalogService;
 import de.evoila.cf.broker.service.availability.ServicePortAvailabilityVerifier;
 import de.evoila.cf.cpi.CredentialConstants;
 import de.evoila.cf.security.credentials.CredentialStore;
+import de.evoila.cf.security.credentials.DefaultCredentialConstants;
 import io.bosh.client.deployments.Deployment;
 import io.bosh.client.errands.ErrandSummary;
 import io.bosh.client.vms.Vm;
@@ -63,5 +64,8 @@ public class MySQLBoshPlatformService extends BoshPlatformService {
         credentialStore.deleteCredentials(serviceInstance, CredentialConstants.GALERA_ENDPOINT_PASSWORD);
         credentialStore.deleteCredentials(serviceInstance, CredentialConstants.GALERA_HEALTH_PASSWORD);
         credentialStore.deleteCredentials(serviceInstance, CredentialConstants.EXPORTER_PASSWORD);
+
+        credentialStore.deleteCredentials(serviceInstance, DefaultCredentialConstants.BACKUP_CREDENTIALS);
+        credentialStore.deleteCredentials(serviceInstance, DefaultCredentialConstants.BACKUP_AGENT_CREDENTIALS);
     }
 }

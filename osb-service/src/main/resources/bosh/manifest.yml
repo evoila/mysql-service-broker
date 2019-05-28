@@ -41,8 +41,8 @@ instance_groups:
     release: osb-bosh-monitoring
   properties:
     backup_agent:
-      user: "backup"
-      password: "rulez"
+      username: backup
+      password: rulez
     mysqld_exporter:
       login: root
     mysql:

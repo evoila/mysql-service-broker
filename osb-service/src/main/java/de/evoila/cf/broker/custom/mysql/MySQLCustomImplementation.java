@@ -59,22 +59,22 @@ public class MySQLCustomImplementation {
         jdbcService.executeUpdate("DROP USER \"" + username + "\"");
     }
 
-    public MySQLDbService connection(ServiceInstance serviceInstance, Plan plan, UsernamePasswordCredential usernamePasswordCredential) {
+    public MySQLDbService connection(ServiceInstance serviceInstance, Plan plan, UsernamePasswordCredential usernamePasswordCredential, String database) {
         MySQLDbService jdbcService = new MySQLDbService();
 
+        List<ServerAddress> serverAddresses = null;
+        if (plan.getMetadata().getIngressInstanceGroup() != null &&
+                plan.getMetadata().getIngressInstanceGroup().length() > 0)
+            serverAddresses = ServiceInstanceUtils.filteredServerAddress(serviceInstance.getHosts(),
+                    plan.getMetadata().getIngressInstanceGroup());
+
         if (plan.getPlatform() == Platform.BOSH) {
-            List<ServerAddress> serverAddresses = serviceInstance.getHosts();
-
-            if (plan.getMetadata().getIngressInstanceGroup() != null &&
-                    plan.getMetadata().getIngressInstanceGroup().length() > 0)
-                serverAddresses = ServiceInstanceUtils.filteredServerAddress(serviceInstance.getHosts(),
-                        plan.getMetadata().getIngressInstanceGroup());
-
             jdbcService.createConnection(usernamePasswordCredential.getUsername(), usernamePasswordCredential.getPassword(),
-                    MySQLUtils.dbName(serviceInstance.getId()), serverAddresses);
+                    database, serverAddresses);
         } else if (plan.getPlatform() == Platform.EXISTING_SERVICE)
             jdbcService.createConnection(existingEndpointBean.getUsername(), existingEndpointBean.getPassword(),
-                    existingEndpointBean.getDatabase(), existingEndpointBean.getHosts());
+                    database, serverAddresses);
+
         return jdbcService;
     }
 

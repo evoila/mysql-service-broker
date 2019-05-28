@@ -15,9 +15,11 @@ import de.evoila.cf.broker.repository.PlatformRepository;
 import de.evoila.cf.broker.service.availability.ServicePortAvailabilityVerifier;
 import de.evoila.cf.cpi.CredentialConstants;
 import de.evoila.cf.security.credentials.CredentialStore;
+import de.evoila.cf.security.credentials.DefaultCredentialConstants;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLException;
 import java.util.Map;
 
 /**
@@ -46,10 +48,13 @@ public class MySQLExistingServiceFactory extends ExistingServiceFactory {
 
 	@Override
     public void deleteInstance(ServiceInstance serviceInstance, Plan plan) throws PlatformException {
-        credentialStore.deleteCredentials(serviceInstance, CredentialConstants.ROOT_CREDENTIALS);
-        MySQLDbService mySQLDbService = mysqlCustomImplementation.connection(serviceInstance, plan, null);
+        MySQLDbService mySQLDbService = mysqlCustomImplementation.connection(serviceInstance, plan, null, "mysql");
 
         mysqlCustomImplementation.deleteDatabase(mySQLDbService, MySQLUtils.dbName(serviceInstance.getId()));
+
+        credentialStore.deleteCredentials(serviceInstance, CredentialConstants.ROOT_CREDENTIALS);
+        credentialStore.deleteCredentials(serviceInstance, DefaultCredentialConstants.BACKUP_AGENT_CREDENTIALS);
+        credentialStore.deleteCredentials(serviceInstance, DefaultCredentialConstants.BACKUP_CREDENTIALS);
 	}
 
     @Override
@@ -59,14 +64,30 @@ public class MySQLExistingServiceFactory extends ExistingServiceFactory {
 
     @Override
     public ServiceInstance createInstance(ServiceInstance serviceInstance, Plan plan, Map<String, Object> parameters) throws PlatformException {
+        if (existingEndpointBean.getBackupCredentials() != null)
+            credentialStore.createUser(serviceInstance, DefaultCredentialConstants.BACKUP_AGENT_CREDENTIALS,
+                    existingEndpointBean.getBackupCredentials().getUsername(), existingEndpointBean.getBackupCredentials().getPassword());
+
         credentialStore.createUser(serviceInstance, CredentialConstants.ROOT_CREDENTIALS);
         UsernamePasswordCredential serviceInstanceUsernamePasswordCredential = credentialStore.getUser(serviceInstance, CredentialConstants.ROOT_CREDENTIALS);
 
+        credentialStore.createUser(serviceInstance, DefaultCredentialConstants.BACKUP_CREDENTIALS, serviceInstanceUsernamePasswordCredential.getUsername(),
+                serviceInstanceUsernamePasswordCredential.getPassword());
+
         serviceInstance.setUsername(serviceInstanceUsernamePasswordCredential.getUsername());
+        serviceInstance.setHosts(existingEndpointBean.getHosts());
+        MySQLDbService mySQLDbService = mysqlCustomImplementation.connection(serviceInstance, plan,
+                new UsernamePasswordCredential(existingEndpointBean.getUsername(), existingEndpointBean.getPassword()), "mysql");
 
-        MySQLDbService mySQLDbService = mysqlCustomImplementation.connection(serviceInstance, plan, null);
+        String database = MySQLUtils.dbName(serviceInstance.getId());
+        mysqlCustomImplementation.createDatabase(mySQLDbService, database);
+        try {
+            mysqlCustomImplementation.bindRoleToDatabase(mySQLDbService, serviceInstanceUsernamePasswordCredential.getUsername(),
+                    serviceInstanceUsernamePasswordCredential.getPassword(), database);
+        } catch(SQLException ex) {
+            throw new PlatformException(ex);
+        }
 
-        mysqlCustomImplementation.createDatabase(mySQLDbService, MySQLUtils.dbName(serviceInstance.getId()));
 
         return serviceInstance;
 	}

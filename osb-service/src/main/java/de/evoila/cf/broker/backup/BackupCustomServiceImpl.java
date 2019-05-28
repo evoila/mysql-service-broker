@@ -59,7 +59,7 @@ public class BackupCustomServiceImpl implements BackupCustomService {
         Map<String, String> result = new HashMap<>();
         if (plan.getPlatform().equals(Platform.BOSH)) {
             UsernamePasswordCredential usernamePasswordCredential = credentialStore.getUser(serviceInstance, CredentialConstants.ROOT_CREDENTIALS);
-            MySQLDbService mySQLDbService = mysqlCustomImplementation.connection(serviceInstance, plan, usernamePasswordCredential);
+            MySQLDbService mySQLDbService = mysqlCustomImplementation.connection(serviceInstance, plan, usernamePasswordCredential, "mysql");
 
             try {
                 Map<String, String> databases = mySQLDbService.executeSelect("SHOW DATABASES");
