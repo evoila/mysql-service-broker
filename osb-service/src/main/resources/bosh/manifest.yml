@@ -46,9 +46,22 @@ instance_groups:
     mysqld_exporter:
       login: root
     mysql:
-      admin:
-        username: root
+      admin_users:
+      - username: root
+        password: rulez
         remote_access: true
+      - username: exporter
+        password: rulez
+        remote_access: true
+      backup_users:
+      - username: backup
+        password: rulez
+        remote_access: true
+      users:
+      - username: sample
+        password: rulez
+        remote_access: true
+      databases: []
 
 - name: haproxy
   instances: 1

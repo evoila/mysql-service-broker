@@ -60,11 +60,6 @@ public class MySQLDeploymentManager extends DeploymentManager {
             HashMap<String, Object> mysql = (HashMap<String, Object>) manifestProperties.get("mysql");
             HashMap<String, Object> backupAgent = (HashMap<String, Object>) manifestProperties.get("backup_agent");
 
-            UsernamePasswordCredential backupAgentusernamePasswordCredential = credentialStore.createUser(serviceInstance,
-                    DefaultCredentialConstants.BACKUP_AGENT_CREDENTIALS);
-            backupAgent.put("username", backupAgentusernamePasswordCredential.getUsername());
-            backupAgent.put("password", backupAgentusernamePasswordCredential.getPassword());
-
             Map<String, Object> clusterHealth = new HashMap<>();
             PasswordCredential galeraHealthPassword = credentialStore.createPassword(serviceInstance,
                     CredentialConstants.GALERA_HEALTH_PASSWORD);
@@ -88,32 +83,40 @@ public class MySQLDeploymentManager extends DeploymentManager {
             mysql.put("galera", galera);
 
 
+            List<HashMap<String, Object>> adminUsers = (List<HashMap<String, Object>>) mysql.get("admin_users");
+            HashMap<String, Object> userProperties = adminUsers.get(0);
             UsernamePasswordCredential rootCredentials = credentialStore.createUser(serviceInstance,
                     CredentialConstants.ROOT_CREDENTIALS, "root");
-            Map<String, Object> adminCredentials = new HashMap<>();
-            adminCredentials.put(MYSQL_ADMIN_USERNAME, rootCredentials.getUsername());
-            adminCredentials.put(MYSQL_ADMIN_PASSWORD, rootCredentials.getPassword());
-            adminCredentials.put(MYSQL_ADMIN_REMOTE_ACCESS, true);
-            mysql.put("admin", adminCredentials);
+            userProperties.put(MYSQL_ADMIN_USERNAME, rootCredentials.getUsername());
+            userProperties.put(MYSQL_ADMIN_PASSWORD, rootCredentials.getPassword());
+            userProperties.put(MYSQL_ADMIN_REMOTE_ACCESS, true);
+            serviceInstance.setUsername(rootCredentials.getUsername());
 
-            rootCredentials = credentialStore.getUser(serviceInstance, CredentialConstants.ROOT_CREDENTIALS);
-            credentialStore.createUser(serviceInstance, DefaultCredentialConstants.BACKUP_CREDENTIALS, rootCredentials.getUsername(), rootCredentials.getPassword());
+            UsernamePasswordCredential exporterCredential = credentialStore.createUser(serviceInstance,
+                    DefaultCredentialConstants.EXPORTER_CREDENTIALS);
+            mysqldExporter.put("user", exporterCredential.getUsername());
+            mysqldExporter.put("password", exporterCredential.getPassword());
+            HashMap<String, Object> exporterProperties = adminUsers.get(1);
+            exporterProperties.put("username", exporterCredential.getUsername());
+            exporterProperties.put("password", exporterCredential.getPassword());
+
+            UsernamePasswordCredential backupAgentUsernamePasswordCredential = credentialStore.createUser(serviceInstance,
+                    DefaultCredentialConstants.BACKUP_AGENT_CREDENTIALS);
+            backupAgent.put("username", backupAgentUsernamePasswordCredential.getUsername());
+            backupAgent.put("password", backupAgentUsernamePasswordCredential.getPassword());
+
+            List<HashMap<String, Object>> backupUsers = (List<HashMap<String, Object>>) mysql.get("backup_users");
+            HashMap<String, Object> backupUserProperties = backupUsers.get(0);
+            UsernamePasswordCredential backupUsernamePasswordCredential = credentialStore.createUser(serviceInstance,
+                    DefaultCredentialConstants.BACKUP_CREDENTIALS);
+            backupUserProperties.put("username", backupUsernamePasswordCredential.getUsername());
+            backupUserProperties.put("password", backupUsernamePasswordCredential.getPassword());
 
             List<Map<String, String>> databases = new ArrayList<>();
             Map<String, String> database = new HashMap<>();
             database.put("name", MySQLUtils.dbName(serviceInstance.getId()));
-
-            UsernamePasswordCredential defaultUserCredential = credentialStore.createUser(serviceInstance,
-                    CredentialConstants.DEFAULT_DB_CREDENTIALS);
-            database.put("username", defaultUserCredential.getUsername());
-            database.put("password", defaultUserCredential.getPassword());
             databases.add(database);
             mysql.put("databases", databases);
-
-            PasswordCredential exporterPassword = credentialStore.createPassword(serviceInstance,
-                    CredentialConstants.EXPORTER_PASSWORD);
-            mysqldExporter.put(MYSQLD_EXPORTER_PASSWORD, exporterPassword.getPassword());
-
 
         } else if (isUpdate && customParameters != null && !customParameters.isEmpty()) {
             for (Map.Entry parameter : customParameters.entrySet()) {
