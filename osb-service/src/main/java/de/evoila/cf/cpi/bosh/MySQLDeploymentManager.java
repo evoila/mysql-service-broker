@@ -112,9 +112,20 @@ public class MySQLDeploymentManager extends DeploymentManager {
             backupUserProperties.put("username", backupUsernamePasswordCredential.getUsername());
             backupUserProperties.put("password", backupUsernamePasswordCredential.getPassword());
 
-            List<Map<String, String>> databases = new ArrayList<>();
-            Map<String, String> database = new HashMap<>();
+            List<HashMap<String, Object>> users = (List<HashMap<String, Object>>) mysql.get("users");
+            HashMap<String, Object> defaultUserProperties = users.get(0);
+            UsernamePasswordCredential defaultUsernamePasswordCredential = credentialStore.createUser(serviceInstance,
+                    CredentialConstants.DEFAULT_DB_CREDENTIALS);
+            defaultUserProperties.put("username", defaultUsernamePasswordCredential.getUsername());
+            defaultUserProperties.put("password", defaultUsernamePasswordCredential.getPassword());
+
+            List<String> databaseUsers = new ArrayList<>();
+            databaseUsers.add(defaultUsernamePasswordCredential.getUsername());
+
+            List<Map<String, Object>> databases = new ArrayList<>();
+            Map<String, Object> database = new HashMap<>();
             database.put("name", MySQLUtils.dbName(serviceInstance.getId()));
+            database.put("users", databaseUsers);
             databases.add(database);
             mysql.put("databases", databases);
 

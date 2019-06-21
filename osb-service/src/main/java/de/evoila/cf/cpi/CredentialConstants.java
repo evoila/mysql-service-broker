@@ -13,7 +13,6 @@ public class CredentialConstants {
 
     public static String GALERA_HEALTH_PASSWORD = "galera_health_password";
 
-    public static String DEFAULT_DB_CREDENTIALS = "default_db_credentials";
+    public static String DEFAULT_DB_CREDENTIALS = "user_credentials";
 
-    public static String EXPORTER_PASSWORD = "exporter_password";
 }

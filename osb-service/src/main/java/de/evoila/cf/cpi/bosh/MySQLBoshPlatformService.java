@@ -63,7 +63,7 @@ public class MySQLBoshPlatformService extends BoshPlatformService {
         credentialStore.deleteCredentials(serviceInstance, CredentialConstants.GALERA_DB_PASSWORD);
         credentialStore.deleteCredentials(serviceInstance, CredentialConstants.GALERA_ENDPOINT_PASSWORD);
         credentialStore.deleteCredentials(serviceInstance, CredentialConstants.GALERA_HEALTH_PASSWORD);
-        credentialStore.deleteCredentials(serviceInstance, CredentialConstants.EXPORTER_PASSWORD);
+        credentialStore.deleteCredentials(serviceInstance, DefaultCredentialConstants.EXPORTER_CREDENTIALS);
 
         credentialStore.deleteCredentials(serviceInstance, DefaultCredentialConstants.BACKUP_CREDENTIALS);
         credentialStore.deleteCredentials(serviceInstance, DefaultCredentialConstants.BACKUP_AGENT_CREDENTIALS);
