@@ -28,6 +28,13 @@
 			<artifactId>mysql-connector-java</artifactId>
 		</dependency>
 
+		<!-- Needed because of the Java 12 Upgrade, although 1.23 is already inherited from spring dependencies-->
+		<dependency>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+			<version>1.23</version>
+		</dependency>
+
 		<!-- Cloud Foundry Service Broker -->
 		<dependency>
 			<groupId>de.evoila.cf.broker</groupId>
