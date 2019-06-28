@@ -1,0 +1,20 @@
+---
+applications:
+  - name: osb-mysql
+    memory: 1G
+    instances: 1
+    timeout: 180
+    routes:
+      - route: osb-mysql.your.cf.host
+    buildpacks:
+      - https://github.com/cloudfoundry/java-buildpack.git#v4.19.1
+      # -> version suffix necessary, if the buildpack of the CF instance is not supporting Java 12
+    path: osb-service/target/osb-mysql-1.2.0.jar
+    env:
+      JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 12.+ } }' 
+      # -> necessary for Java 12, if the buildpack of the CF instance is not supporting Java 12
+      SPRING_APPLICATION_NAME: osb-mysql
+      SPRING_CLOUD_CONFIG_URI: http://config-server.example.host
+      SPRING_CLOUD_CONFIG_USERNAME: config-username
+      SPRING_CLOUD_CONFIG_PASSWORD: config-password
+      SPRING_PROFILES_ACTIVE: profile1, profile2
