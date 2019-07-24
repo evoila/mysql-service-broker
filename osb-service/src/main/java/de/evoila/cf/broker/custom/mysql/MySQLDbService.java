@@ -26,7 +26,7 @@ public class MySQLDbService {
         String connectionUrl = ServiceInstanceUtils.connectionUrl(serverAddresses);
 
         try {
-			Class.forName("com.mysql.jdbc.Driver").newInstance();
+			Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
 			String url = "jdbc:mysql://" + connectionUrl + "/" + database;
 			connection = DriverManager.getConnection(url, username, password);
 		} catch (ClassNotFoundException | SQLException | InstantiationException | IllegalAccessException e) {
