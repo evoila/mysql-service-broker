@@ -4,7 +4,7 @@ name: osb-mariadb
 releases:
 - name: osb-bosh-mysql
   version: latest
-- name: osb-bosh-monitoring
+- name: prometheus
   version: latest
 - name: osb-bosh-haproxy
   version: latest
