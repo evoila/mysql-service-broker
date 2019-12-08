@@ -35,16 +35,18 @@ instance_groups:
     release: osb-bosh-mysql
   - name: backup-agent
     release: osb-bosh-mysql
-  - name: node_exporter
-    release: osb-bosh-monitoring
   - name: mysqld_exporter
-    release: osb-bosh-monitoring
+    release: prometheus
+    properties:
+      mysqld_exporter:
+        mysql:
+          address: localhost
+          username: ((exporter_credentials.username))
+          password: ((exporter_credentials.password))
   properties:
     backup_agent:
       username: backup
       password: rulez
-    mysqld_exporter:
-      login: root
     mysql:
       admin_users:
       - username: root
@@ -74,10 +76,12 @@ instance_groups:
   jobs:
   - name: haproxy
     release: osb-bosh-haproxy
-  - name: node_exporter
-    release: osb-bosh-monitoring
   - name: haproxy_exporter
-    release: osb-bosh-monitoring
+    release: prometheus
+    properties:
+      haproxy_exporter:
+        haproxy:
+          scrape_uri: "unix:/var/vcap/sys/run/haproxy/stats.sock"
   properties:
     ha_proxy:
       client_timeout: 10

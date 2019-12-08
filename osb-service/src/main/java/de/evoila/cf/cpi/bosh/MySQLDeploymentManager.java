@@ -94,9 +94,11 @@ public class MySQLDeploymentManager extends DeploymentManager {
 
             UsernamePasswordCredential exporterCredential = credentialStore.createUser(serviceInstance,
                     DefaultCredentialConstants.EXPORTER_CREDENTIALS);
-            mysqldExporter.put("user", exporterCredential.getUsername());
-            mysqldExporter.put("password", exporterCredential.getPassword());
+            HashMap<String, Object> mysqldExporterMysql = (HashMap<String, Object>)getProperty(mysqldExporter,"myslq");
+            mysqldExporterMysql.put("username", exporterCredential.getUsername());
+            mysqldExporterMysql.put("password", exporterCredential.getPassword());
             HashMap<String, Object> exporterProperties = adminUsers.get(1);
+
             exporterProperties.put("username", exporterCredential.getUsername());
             exporterProperties.put("password", exporterCredential.getPassword());
 
